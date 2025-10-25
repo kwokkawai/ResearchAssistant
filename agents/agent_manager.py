@@ -486,6 +486,7 @@ class AgentManager:
         deep_research_options = merged_options
 
         # Perform RAG search if enabled (takes precedence over web search)
+        rag_success = False
         if rag_config and rag_config.get('enabled') and rag_manager:
             try:
                 print("Performing RAG search instead of web search")
@@ -495,12 +496,26 @@ class AgentManager:
                     llm_manager=self.llm_manager,
                     preferred_model=preferred_model
                 )
-                results['rag_results'] = rag_result
-                # Skip web search when RAG is enabled
-                deep_research_options['enableWebSearch'] = False
+
+                # Check if RAG result is valid (not an error message)
+                rag_response = rag_result.get('response', '')
+                if rag_response and not rag_response.startswith('基于文档内容的回答生成失败') and not 'error' in rag_response.lower():
+                    results['rag_results'] = rag_result
+                    rag_success = True
+                    # Skip web search when RAG is enabled and successful
+                    deep_research_options['enableWebSearch'] = False
+                    print("RAG search successful")
+                else:
+                    print(f"RAG search returned invalid result: {rag_response[:100]}...")
+                    results['rag_error'] = f"RAG返回无效结果: {rag_response[:100]}"
+                    # Disable RAG for this query since it failed
+                    rag_config['enabled'] = False
             except Exception as e:
                 print(f"RAG search failed: {e}")
                 results['rag_error'] = str(e)
+                # Disable RAG for this query since it failed
+                if rag_config:
+                    rag_config['enabled'] = False
 
         # Perform web search if enabled (and RAG is not enabled)
         if deep_research_options and deep_research_options.get('enableWebSearch'):
@@ -555,8 +570,8 @@ class AgentManager:
                     context_dict['web_search_results'] = results.get('web_search_results', [])
                     context_dict['deep_research_enabled'] = deep_research_options.get('enableDeepResearch', False)
 
-                # Add RAG results if available
-                if results.get('rag_results'):
+                # Add RAG results only if RAG was successful
+                if rag_success and results.get('rag_results'):
                     context_dict['rag_results'] = results['rag_results']
                     context_dict['rag_enabled'] = True
                 
@@ -585,12 +600,15 @@ class AgentManager:
         results['results'] = list(agent_results.values())
 
         # Generate summary using the preferred model
-        # If RAG was used, use RAG results for summary generation
-        if results.get('rag_results'):
+        # If RAG was successful, use RAG results for summary generation
+        if rag_success and results.get('rag_results'):
             results['summary'] = results['rag_results'].get('response', 'RAG回答生成失败')
             results['rag_sources'] = results['rag_results'].get('sources', [])
+            print("Using RAG results for final summary")
         else:
             results['summary'] = self._generate_summary(query, agent_results, preferred_model, results.get('web_search_results', []))
+            if results.get('rag_error'):
+                print(f"RAG was enabled but failed, using normal agent responses for summary. RAG error: {results['rag_error']}")
 
         return results
     
