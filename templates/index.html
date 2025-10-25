@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>研究助手 - Research Assistant</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔬 多智能体研究助手</h1>
+            <p class="subtitle">Multi-Agent Research Assistant</p>
+            <div class="status-bar">
+                <span id="provider-status">正在连接...</span>
+                <span id="session-count">活跃会话: 0</span>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <div class="sidebar">
+                <h2>智能体选择</h2>
+                <div id="agent-list" class="agent-list">
+                    <button class="agent-btn active" data-agent="auto">
+                        <span class="agent-icon">🤖</span>
+                        <div class="agent-info">
+                            <div class="agent-name">自动选择</div>
+                            <div class="agent-desc">智能路由到合适的助手</div>
+                        </div>
+                    </button>
+                </div>
+
+                <div class="session-controls">
+                    <h3>会话管理</h3>
+                    <button id="new-session-btn" class="control-btn">
+                        <span>➕</span> 新建会话
+                    </button>
+                    <button id="clear-session-btn" class="control-btn">
+                        <span>🗑️</span> 清空历史
+                    </button>
+                </div>
+            </div>
+
+            <div class="chat-container">
+                <div id="chat-messages" class="chat-messages">
+                    <div class="welcome-message">
+                        <h2>欢迎使用研究助手！</h2>
+                        <p>我是一个多智能体AI系统，可以帮助您进行：</p>
+                        <ul>
+                            <li>📚 学术研究和文献分析</li>
+                            <li>📊 数据分析和统计咨询</li>
+                            <li>✍️ 学术写作和论文撰写</li>
+                            <li>💡 一般性研究问题解答</li>
+                        </ul>
+                        <p>请输入您的问题开始对话...</p>
+                    </div>
+                </div>
+
+                <div class="chat-input-container">
+                    <div class="current-agent">
+                        <span id="current-agent-display">当前助手: 自动选择</span>
+                    </div>
+                    <div class="input-wrapper">
+                        <textarea id="user-input" placeholder="输入您的问题..." rows="3"></textarea>
+                        <button id="send-btn" class="send-btn">
+                            <span>发送</span> ➤
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
