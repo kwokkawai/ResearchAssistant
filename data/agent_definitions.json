@@ -8,20 +8,7 @@
       "color": "primary",
       "prompt_template": "作为一个专业的研究助手，请分析以下查询并提供全面的研究结果：\n\n查询: {query}\n\n{context_info}{web_search_info}{deep_research_note}{rag_note}\n\n请提供：\n1. 查询的核心主题分析\n2. 相关的主要概念和术语\n3. 可能的研究方向\n4. 建议的进一步研究问题\n5. 关键发现和见解\n\n请用中文回答，结构清晰，内容详实，逻辑严密。",
       "enabled": true,
-      "template_config": {
-        "default_model": "gemini",
-        "preferred_ollama_model": "deepseek-r1:latest",
-        "preferred_openai_model": "gpt-4o",
-        "preferred_gemini_model": "gemini-1.5-pro",
-        "deep_research_enabled": true,
-        "web_search_enabled": true,
-        "search_engine": "duckduckgo",
-        "search_results_count": 15,
-        "include_images": true,
-        "temperature": 0.8,
-        "max_tokens": 2500,
-        "timeout": 400
-      },
+      "template_id": "research_focus",
       "created_at": "2024-01-01T00:00:00Z",
       "updated_at": "2025-10-25T18:42:57.659647"
     },
@@ -69,20 +56,7 @@
       "color": "secondary",
       "prompt_template": "作为一个创意专家，请分析以下创意查询并提供创新的解决方案：\n\n查询: {query}\n\n{context_info}{web_search_info}{deep_research_note}{rag_note}\n\n请提供：\n1. 创意问题分析\n2. 创新思路和想法\n3. 创意实施方案\n4. 内容创作建议\n5. 视觉和设计建议\n6. 创意评估标准\n\n请用中文回答，注重创新性和创意质量。",
       "enabled": true,
-      "template_config": {
-        "default_model": "openai",
-        "preferred_ollama_model": "deepseek-r1:latest",
-        "preferred_openai_model": "gpt-4o",
-        "preferred_gemini_model": "gemini-1.5-pro",
-        "deep_research_enabled": true,
-        "web_search_enabled": true,
-        "search_engine": "duckduckgo",
-        "search_results_count": 8,
-        "include_images": true,
-        "temperature": 0.9,
-        "max_tokens": 2000,
-        "timeout": 300
-      },
+      "template_id": "creative_focus",
       "created_at": "2024-01-01T00:00:00Z",
       "updated_at": "2024-01-01T00:00:00Z"
     },

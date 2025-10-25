@@ -126,6 +126,31 @@
     "created_at": "2024-01-01T00:00:00Z",
     "updated_at": "2025-10-25T08:33:47.663326"
   },
+  "research_focus": {
+    "template_id": "research_focus",
+    "name": "研究助手模板",
+    "description": "专注于综合研究和多角度分析的模板",
+    "config": {
+      "default_model": "gemini",
+      "preferred_ollama_model": "deepseek-r1:latest",
+      "preferred_openai_model": "gpt-4o",
+      "preferred_gemini_model": "gemini-1.5-pro",
+      "deep_research_enabled": true,
+      "web_search_enabled": true,
+      "search_engine": "duckduckgo",
+      "search_results_count": 15,
+      "include_images": true,
+      "temperature": 0.8,
+      "max_tokens": 2500,
+      "timeout": 400,
+      "rag_enabled": false,
+      "rag_top_k": 5,
+      "rag_context_window": 2,
+      "document_links": []
+    },
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2025-10-25T18:42:57.659647"
+  },
   "web_query": {
     "template_id": "web_query",
     "name": "网络查询模板",
