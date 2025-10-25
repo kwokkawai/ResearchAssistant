@@ -5,6 +5,7 @@ Handles loading and processing of various document formats for RAG
 
 import os
 import json
+import io
 from typing import Dict, List, Any, Optional, Tuple
 from datetime import datetime
 import hashlib
