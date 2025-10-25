@@ -254,6 +254,64 @@ class RAGManager:
                 'message': f'Query failed: {str(e)}'
             }
 
+    def _validate_rag_response(self, response: str, context: str, query: str) -> Dict[str, bool]:
+        """
+        验证RAG回答是否基于文档内容
+        """
+        try:
+            response_lower = response.lower().strip()
+            context_lower = context.lower().strip()
+
+            # 检查是否包含明显的通用回答模式
+            generic_phrases = [
+                "文档摘要", "技术路线", "抽取式", "生成式", "混合式",
+                "预处理", "文本分块", "质量评估", "安全合规",
+                "tf-idf", "textrank", "bertsum", "longformer", "led",
+                "t5", "bart", "gpt-3", "gpt-4", "claude", "llama"
+            ]
+
+            found_generic = any(phrase in response_lower for phrase in generic_phrases)
+
+            if found_generic:
+                return {
+                    'is_valid': False,
+                    'reason': f'回答包含通用技术术语，可能不基于具体文档内容: {found_generic}'
+                }
+
+            # 检查回答长度是否合理（太长的回答可能偏离主题）
+            if len(response) > 2000 and "文档中没有相关信息" not in response:
+                return {
+                    'is_valid': False,
+                    'reason': '回答过长，可能包含无关内容'
+                }
+
+            # 检查是否至少包含一些文档中的内容
+            # 简单的启发式检查：回答中是否包含文档中的一些关键词
+            context_words = set(context_lower.split())
+            response_words = set(response_lower.split())
+
+            # 计算重叠度
+            overlap = len(context_words.intersection(response_words))
+            overlap_ratio = overlap / len(response_words) if response_words else 0
+
+            if overlap_ratio < 0.1 and len(response) > 50:  # 如果重叠度太低且回答不短
+                return {
+                    'is_valid': False,
+                    'reason': f'回答与文档内容重叠度太低 ({overlap_ratio:.2f})'
+                }
+
+            return {
+                'is_valid': True,
+                'reason': '回答似乎基于文档内容'
+            }
+
+        except Exception as e:
+            print(f"验证RAG回答时出错: {e}")
+            return {
+                'is_valid': True,  # 出错时假设有效，避免误报
+                'reason': f'验证过程出错: {e}'
+            }
+
     def _get_context_chunks(self, document_id: str, center_index: int, window: int) -> List[Dict[str, Any]]:
         """Get chunks around a center chunk for better context"""
         try:
@@ -303,26 +361,36 @@ class RAGManager:
             context = query_result['context']
             sources = query_result['sources']
 
-            rag_prompt = f"""基于以下文档内容回答问题。请严格按照以下规则：
+            rag_prompt = f"""[严格指令] 你是一个文档分析助手，只能基于提供的文档内容回答问题。
 
-规则：
-1. 只能使用提供的文档内容来回答问题
-2. 如果文档中没有相关信息，请明确说明"文档中没有相关信息"
-3. 不要基于你的训练知识进行推测或补充信息
-4. 回答必须100%基于文档内容
-5. 如果问题是关于文档以外的内容，请说明"超出文档范围"
+重要规则：
+1. 禁止使用任何先验知识、训练数据或通用知识
+2. 只能引用和总结提供的文档内容
+3. 如果文档中没有相关信息，必须回答"文档中没有相关信息"
+4. 不要生成任何关于文档处理技术、摘要方法或其他通用内容的回答
+5. 回答必须严格基于文档的具体内容
 
-文档内容：
+提供的文档内容：
+---
 {context}
+---
 
-问题：{query}
+用户问题：{query}
 
-请基于以上文档内容提供准确回答。如果文档中没有足够信息来回答这个问题，请明确说明。"""
+请基于以上提供的文档内容进行回答。如果文档内容中没有足够信息来回答这个问题，请明确说明。"""
 
             # Generate response using LLM
             if llm_manager:
                 try:
                     response = llm_manager.generate_response(preferred_model, rag_prompt)
+
+                    # 验证回答是否基于文档内容
+                    validation_result = self._validate_rag_response(response, context, query)
+                    if not validation_result['is_valid']:
+                        print(f"警告: RAG回答可能不基于文档内容 - {validation_result['reason']}")
+                        # 可以选择重新生成或添加警告
+                        response = f"[警告: 回答可能不完全基于文档内容] {response}"
+
                 except Exception as e:
                     print(f"LLM generation failed: {e}")
                     response = f"基于文档内容的回答生成失败: {str(e)}"
