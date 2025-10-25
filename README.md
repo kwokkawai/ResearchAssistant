@@ -209,6 +209,33 @@ gunicorn -w 4 -b 0.0.0.0:5050 app:app
 - **导出对话**: 下载JSON格式的完整对话记录
 - **上下文保持**: 自动使用之前的研究结果作为上下文
 
+### 5. 本地文档RAG功能
+
+基于本地文档的检索增强生成，让AI回答完全基于您的私有文档：
+
+- **多格式支持**: PDF、Word文档、Markdown、JSON、HTML、纯文本
+- **智能检索**: 语义搜索而非关键词匹配
+- **100%私有**: 回答完全基于本地文档，不使用外部知识
+- **批量加载**: 支持文件夹批量加载文档
+- **实时测试**: 配置前可测试文档加载状态
+
+#### 配置方法：
+1. 进入"智能体管理" → 选择智能体 → "配置模板"
+2. 启用"本地文档RAG"
+3. 在"文档链接"中输入文档路径（每行一个）
+4. 设置检索参数并测试加载
+
+#### 支持的文档格式：
+- `.pdf` - PDF文档
+- `.docx`/`.doc` - Word文档
+- `.md`/`.markdown` - Markdown文件
+- `.txt` - 纯文本文件
+- `.json` - JSON文件
+- `.html`/`.htm` - HTML文件
+
+#### 故障排除：
+如果遇到文档加载问题，请参考 [`docs/rag_troubleshooting.md`](docs/rag_troubleshooting.md)
+
 ## 🔌 API接口
 
 ### 研究接口
@@ -275,6 +302,52 @@ GET /api/agents/template-config
 
 # 更新智能体模板配置
 POST /api/agents/template-config
+```
+
+### RAG文档管理接口
+
+```http
+# 获取已加载文档列表
+GET /api/rag/documents
+
+# 添加文档（支持文件路径或文件夹路径）
+POST /api/rag/documents
+Content-Type: application/json
+
+{
+    "file_path": "/path/to/document.pdf"
+}
+
+# 文件上传
+POST /api/rag/documents/upload
+Content-Type: multipart/form-data
+
+# 删除文档
+DELETE /api/rag/documents/{document_id}
+
+# 获取文档详情
+GET /api/rag/documents/{document_id}
+
+# 直接查询文档
+POST /api/rag/query
+Content-Type: application/json
+
+{
+    "query": "您的查询",
+    "document_ids": ["可选的文档ID列表"],
+    "top_k": 5
+}
+
+# 生成RAG回答
+POST /api/rag/generate
+Content-Type: application/json
+
+{
+    "query": "您的查询",
+    "document_ids": ["可选的文档ID列表"],
+    "top_k": 5,
+    "model": "openai"
+}
 ```
 
 ## 📁 项目结构
@@ -508,6 +581,13 @@ DEBUG=True python run.py
 - [x] 会话管理
 - [x] 对话导出
 - [x] 智能体模板配置
+
+### 已实现功能 ✅
+- [x] 本地文档RAG功能
+- [x] 多格式文档支持 (PDF, Word, MD, JSON, HTML, TXT)
+- [x] 向量数据库和语义搜索
+- [x] 智能体RAG配置
+- [x] 文档上传和管理
 
 ### 计划功能 🚧
 - [ ] 用户认证系统
