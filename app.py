@@ -546,20 +546,51 @@ def add_document():
             return jsonify({'error': 'RAG manager not available'}), 503
 
         data = request.get_json()
-        file_path = data.get('file_path', '')
+        file_path = data.get('file_path', '').strip()
 
         if not file_path:
-            return jsonify({'error': 'No file path provided'}), 400
+            return jsonify({'error': 'No file path provided', 'details': 'Please provide a valid file path'}), 400
+
+        # 记录请求信息用于调试
+        print(f"RAG API: Attempting to add document from path: '{file_path}'")
 
         result = rag_manager.add_document(file_path)
 
         if result['success']:
+            print(f"RAG API: Successfully added document: {result.get('filename', 'unknown')}")
             return jsonify(result), 201
         else:
+            print(f"RAG API: Failed to add document '{file_path}': {result.get('error', 'Unknown error')}")
             return jsonify(result), 400
 
+    except FileNotFoundError as e:
+        error_msg = f'File or directory not found: {str(e)}'
+        print(f"RAG API Error: {error_msg}")
+        return jsonify({
+            'error': error_msg,
+            'details': 'Please check that the file/directory exists and the path is correct'
+        }), 404
+    except PermissionError as e:
+        error_msg = f'Permission denied: {str(e)}'
+        print(f"RAG API Error: {error_msg}")
+        return jsonify({
+            'error': error_msg,
+            'details': 'Please check file/directory permissions'
+        }), 403
+    except IsADirectoryError as e:
+        error_msg = f'Expected file but found directory: {str(e)}'
+        print(f"RAG API Error: {error_msg}")
+        return jsonify({
+            'error': error_msg,
+            'details': 'For directories, use the directory loading endpoint or check your path'
+        }), 400
     except Exception as e:
-        return jsonify({'error': f'Failed to add document: {str(e)}'}), 500
+        error_msg = f'Failed to add document: {str(e)}'
+        print(f"RAG API Error: {error_msg}")
+        return jsonify({
+            'error': error_msg,
+            'details': 'An unexpected error occurred. Check server logs for more details.'
+        }), 500
 
 @app.route('/api/rag/documents/upload', methods=['POST'])
 def upload_document():

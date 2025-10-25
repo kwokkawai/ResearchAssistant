@@ -64,20 +64,44 @@ class DocumentProcessor:
 
     def load_documents_from_directory(self, directory_path: str) -> List[Dict[str, Any]]:
         """Load all supported documents from a directory"""
-        directory = Path(directory_path)
+        directory = Path(directory_path).resolve()  # 解析绝对路径
         documents = []
+        found_files = []
+
+        print(f"Loading documents from directory: {directory}")
 
         if not directory.exists():
             raise FileNotFoundError(f"Directory not found: {directory}")
 
+        if not directory.is_dir():
+            raise NotADirectoryError(f"Path is not a directory: {directory}")
+
+        # 首先列出目录内容进行调试
+        try:
+            all_files = list(directory.rglob('*'))
+            print(f"Found {len(all_files)} total files/directories in {directory}")
+        except PermissionError as e:
+            raise PermissionError(f"No permission to access directory {directory}: {e}")
+
+        # 查找支持的文件
         for file_path in directory.rglob('*'):
-            if file_path.is_file() and file_path.suffix.lower() in self.SUPPORTED_FORMATS:
-                try:
-                    document = self.load_document(str(file_path))
-                    documents.append(document)
-                except Exception as e:
-                    print(f"Error loading document {file_path}: {e}")
-                    continue
+            if file_path.is_file():
+                file_ext = file_path.suffix.lower()
+                found_files.append(str(file_path))
+                if file_ext in self.SUPPORTED_FORMATS:
+                    print(f"Processing supported file: {file_path} (format: {self.SUPPORTED_FORMATS[file_ext]})")
+                    try:
+                        document = self.load_document(str(file_path))
+                        documents.append(document)
+                        print(f"Successfully loaded document: {file_path.name}")
+                    except Exception as e:
+                        print(f"Error loading document {file_path}: {e}")
+                        continue
+                else:
+                    print(f"Skipping unsupported file: {file_path} (format: {file_ext})")
+
+        print(f"Directory scan complete. Found {len(found_files)} files, loaded {len(documents)} documents.")
+        print(f"Supported formats: {list(self.SUPPORTED_FORMATS.keys())}")
 
         return documents
 

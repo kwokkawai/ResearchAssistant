@@ -2221,6 +2221,8 @@
                     let successCount = 0;
                     let totalCount = 0;
 
+                    let errorDetails = [];
+
                     for (const link of documentLinks) {
                         if (link.trim()) {
                             totalCount++;
@@ -2236,9 +2238,13 @@
                                 const result = await response.json();
                                 if (result.success) {
                                     successCount++;
+                                } else {
+                                    errorDetails.push(`${link.trim()}: ${result.error}${result.details ? ' (' + result.details + ')' : ''}`);
+                                    console.error(`Failed to load document: ${link.trim()}`, result);
                                 }
                             } catch (error) {
-                                console.error(`Failed to test document: ${link}`, error);
+                                errorDetails.push(`${link.trim()}: Network error - ${error.message}`);
+                                console.error(`Network error for document: ${link.trim()}`, error);
                             }
                         }
                     }
@@ -2249,9 +2255,17 @@
                     } else if (successCount > 0) {
                         document.getElementById('ragTestResult').textContent = `部分成功：${successCount}/${totalCount} 个文档加载成功`;
                         document.getElementById('ragTestResult').className = 'text-warning';
+                        if (errorDetails.length > 0) {
+                            console.warn('部分文档加载失败详情:', errorDetails);
+                        }
                     } else {
                         document.getElementById('ragTestResult').textContent = `测试失败：0/${totalCount} 个文档加载成功`;
                         document.getElementById('ragTestResult').className = 'text-danger';
+                        if (errorDetails.length > 0) {
+                            console.error('文档加载失败详情:', errorDetails);
+                            // 显示第一个错误详情
+                            document.getElementById('ragTestResult').textContent += `\n错误详情: ${errorDetails[0]}`;
+                        }
                     }
 
                 } catch (error) {
