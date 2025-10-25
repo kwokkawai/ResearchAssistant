@@ -1,0 +1,2235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>迷途小書僮 - 多智能体系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .agent-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .agent-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        .agent-card.selected {
+            border-color: #007bff;
+            background-color: #f8f9fa;
+        }
+        .model-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .model-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        .model-card.selected {
+            border-color: #28a745;
+            background-color: #f8fff8;
+        }
+        .ollama-model-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .ollama-model-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        .ollama-model-card.selected {
+            border-color: #17a2b8;
+            background-color: #f8f9fa;
+        }
+        .loading-spinner {
+            display: none;
+        }
+        .result-section {
+            display: none;
+        }
+        .model-status {
+            font-size: 0.8em;
+        }
+        .status-available {
+            color: #28a745;
+        }
+        .status-unavailable {
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-robot me-2"></i>迷途小書僮
+            </a>
+            <div class="navbar-nav ms-auto">
+                <button class="btn btn-outline-light me-3" id="agentManagementBtn">
+                    <i class="fas fa-cogs me-2"></i>智能体管理
+                </button>
+                <span class="navbar-text">
+                    <i class="fas fa-brain me-1"></i>多智能体研究系统
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Query Input Section -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-search me-2"></i>研究查询
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="researchQuery" class="form-label">请输入您的研究问题：</label>
+                            <textarea class="form-control" id="researchQuery" rows="3" 
+                                placeholder="例如：人工智能在医疗领域的应用前景如何？"></textarea>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <button class="btn btn-primary" id="startResearch">
+                                    <i class="fas fa-play me-2"></i>开始研究
+                                </button>
+                                <div class="ms-3">
+                                    <small class="text-muted">
+                                        使用模型: <span id="selectedModelDisplay">OpenAI GPT</span>
+                                    </small><br>
+                                    <small id="selectedAgentsDisplay" style="color: #dc3545;">请选择一个智能体</small>
+                                </div>
+                            </div>
+                            <div class="loading-spinner" id="loadingSpinner">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">研究中...</span>
+                                </div>
+                                <span class="ms-2">智能体正在研究中...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Agent Selection Section -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-users me-2"></i>选择智能体
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle me-1"></i>
+                                您可以选择一个或多个智能体进行研究。每个智能体都有其专业领域，多选可以获得更全面的分析结果。
+                            </small>
+                        </div>
+                        <div class="row" id="agentSelection">
+                            <!-- Agents will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Model Selection Section -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-server me-2"></i>选择LLM模型
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row" id="modelSelection">
+                            <!-- Model selection will be loaded here -->
+                        </div>
+                        
+                        <!-- Ollama Model Selection -->
+                        <div class="row mt-3" id="ollamaModelSection" style="display: none;">
+                            <div class="col-12">
+                                <div class="card border-info">
+                                    <div class="card-header bg-info text-white">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-desktop me-2"></i>选择Ollama模型
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row" id="ollamaModelSelection">
+                                            <!-- Ollama models will be loaded here -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- OpenAI Model Selection -->
+                        <div class="row mt-3" id="openaiModelSection" style="display: none;">
+                            <div class="col-12">
+                                <div class="card border-success">
+                                    <div class="card-header bg-success text-white">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-brain me-2"></i>选择OpenAI模型
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row" id="openaiModelSelection">
+                                            <!-- OpenAI models will be loaded here -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Google Gemini Model Selection -->
+                        <div class="row mt-3" id="geminiModelSection" style="display: none;">
+                            <div class="col-12">
+                                <div class="card border-warning">
+                                    <div class="card-header bg-warning text-dark">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-gem me-2"></i>选择Google Gemini模型
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row" id="geminiModelSelection">
+                                            <!-- Google Gemini models will be loaded here -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Deep Research Options Section -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-search me-2"></i>深度研究选项
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="enableDeepResearch" checked>
+                                    <label class="form-check-label" for="enableDeepResearch">
+                                        <i class="fas fa-microscope me-1"></i>启用深度研究
+                                    </label>
+                                    <small class="form-text text-muted">使用多轮分析和综合推理</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="enableWebSearch">
+                                    <label class="form-check-label" for="enableWebSearch">
+                                        <i class="fas fa-globe me-1"></i>启用网络搜索
+                                    </label>
+                                    <small class="form-text text-muted">搜索最新信息和实时数据</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3" id="webSearchOptions" style="display: none;">
+                            <div class="col-12">
+                                <div class="card border-info">
+                                    <div class="card-header bg-info text-white">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-cog me-2"></i>网络搜索设置
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <label for="searchEngine" class="form-label">搜索引擎</label>
+                                                <select class="form-select" id="searchEngine">
+                                                    <option value="google">Google</option>
+                                                    <option value="bing">Bing</option>
+                                                    <option value="duckduckgo">DuckDuckGo</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="searchResults" class="form-label">搜索结果数量</label>
+                                                <select class="form-select" id="searchResults">
+                                                    <option value="5">5个结果</option>
+                                                    <option value="10" selected>10个结果</option>
+                                                    <option value="15">15个结果</option>
+                                                    <option value="20">20个结果</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="row mt-2">
+                                            <div class="col-12">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="includeImages" checked>
+                                                    <label class="form-check-label" for="includeImages">
+                                                        <i class="fas fa-image me-1"></i>包含图片搜索
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="row mt-4 result-section" id="resultsSection">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-line me-2"></i>研究结果
+                        </h5>
+                        <div>
+                            <button class="btn btn-sm btn-outline-primary" id="continueResearchBtn" style="display: none;">
+                                <i class="fas fa-plus me-1"></i>继续研究
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary" id="exportConversationBtn" style="display: none;">
+                                <i class="fas fa-download me-1"></i>导出对话
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="researchResults">
+                            <!-- Results will be displayed here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Continue Research Section -->
+        <div class="row mt-4" id="continueResearchSection" style="display: none;">
+            <div class="col-12">
+                <div class="card border-success">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-comments me-2"></i>继续研究对话
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Agent Selection for Continue Research -->
+                        <div class="mb-3">
+                            <label class="form-label">选择智能体（可选，默认使用之前的设置）：</label>
+                            <div class="row" id="continueAgentSelection">
+                                <!-- Agent selection will be loaded here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Model Selection for Continue Research -->
+                        <div class="mb-3">
+                            <label class="form-label">选择LLM模型（可选，默认使用之前的设置）：</label>
+                            <div class="row" id="continueModelSelection">
+                                <!-- Model selection will be loaded here -->
+                            </div>
+                            
+                            <!-- Ollama Model Selection for Continue Research -->
+                            <div class="row mt-3" id="continueOllamaModelSection" style="display: none;">
+                                <div class="col-12">
+                                    <div class="card border-info">
+                                        <div class="card-header bg-info text-white">
+                                            <h6 class="mb-0">
+                                                <i class="fas fa-desktop me-2"></i>选择Ollama模型
+                                            </h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row" id="continueOllamaModelSelection">
+                                                <!-- Ollama models will be loaded here -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Query Input -->
+                        <div class="mb-3">
+                            <label for="continueQuery" class="form-label">基于之前的研究结果，请输入您的新问题：</label>
+                            <textarea class="form-control" id="continueQuery" rows="3" 
+                                placeholder="例如：基于刚才的分析，请进一步探讨..."></textarea>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <button class="btn btn-success" id="submitContinueResearch">
+                                    <i class="fas fa-paper-plane me-2"></i>提交新研究
+                                </button>
+                                <button class="btn btn-outline-secondary" id="cancelContinueResearch">
+                                    <i class="fas fa-times me-2"></i>取消
+                                </button>
+                            </div>
+                            <div class="loading-spinner" id="continueLoadingSpinner">
+                                <div class="spinner-border text-success" role="status">
+                                    <span class="visually-hidden">研究中...</span>
+                                </div>
+                                <span class="ms-2">智能体正在分析新问题...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Agent Management Modal -->
+    <div class="modal fade" id="agentManagementModal" tabindex="-1" aria-labelledby="agentManagementModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="agentManagementModalLabel">
+                        <i class="fas fa-cogs me-2"></i>智能体管理
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Agent Management Tabs -->
+                    <ul class="nav nav-tabs" id="agentManagementTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="agents-tab" data-bs-toggle="tab" data-bs-target="#agents" type="button" role="tab">
+                                <i class="fas fa-robot me-2"></i>智能体定义
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="templates-tab" data-bs-toggle="tab" data-bs-target="#templates" type="button" role="tab">
+                                <i class="fas fa-layer-group me-2"></i>模板管理
+                            </button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content" id="agentManagementTabContent">
+                        <!-- Agents Tab -->
+                        <div class="tab-pane fade show active" id="agents" role="tabpanel">
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h6>智能体列表</h6>
+                                        <button class="btn btn-primary btn-sm" id="addAgentBtn">
+                                            <i class="fas fa-plus me-1"></i>添加智能体
+                                        </button>
+                                    </div>
+                                    <div id="agentsList">
+                                        <!-- Agents will be loaded here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Templates Tab -->
+                        <div class="tab-pane fade" id="templates" role="tabpanel">
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h6>模板列表</h6>
+                                        <button class="btn btn-primary btn-sm" id="addTemplateBtn">
+                                            <i class="fas fa-plus me-1"></i>添加模板
+                                        </button>
+                                    </div>
+                                    <div id="templatesList">
+                                        <!-- Templates will be loaded here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Agent Edit Modal -->
+    <div class="modal fade" id="agentEditModal" tabindex="-1" aria-labelledby="agentEditModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="agentEditModalLabel">
+                        <i class="fas fa-edit me-2"></i>编辑智能体
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="agentEditForm">
+                        <input type="hidden" id="agentId" name="agentId">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="agentName" class="form-label">名称</label>
+                                    <input type="text" class="form-control" id="agentName" name="name" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="agentIcon" class="form-label">图标</label>
+                                    <select class="form-select" id="agentIcon" name="icon">
+                                        <option value="search">搜索</option>
+                                        <option value="code">代码</option>
+                                        <option value="graduation-cap">学术</option>
+                                        <option value="chart-line">商业</option>
+                                        <option value="lightbulb">创意</option>
+                                        <option value="balance-scale">法律</option>
+                                        <option value="robot">机器人</option>
+                                        <option value="brain">大脑</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="agentColor" class="form-label">颜色</label>
+                                    <select class="form-select" id="agentColor" name="color">
+                                        <option value="primary">主要</option>
+                                        <option value="success">成功</option>
+                                        <option value="info">信息</option>
+                                        <option value="warning">警告</option>
+                                        <option value="secondary">次要</option>
+                                        <option value="dark">深色</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="agentEnabled" name="enabled" checked>
+                                        <label class="form-check-label" for="agentEnabled">
+                                            启用
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="agentDescription" class="form-label">描述</label>
+                            <textarea class="form-control" id="agentDescription" name="description" rows="2" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="agentPrompt" class="form-label">提示模板</label>
+                            <textarea class="form-control" id="agentPrompt" name="prompt_template" rows="8" required></textarea>
+                            <div class="form-text">
+                                可用变量: {query}, {context_info}, {web_search_info}, {deep_research_note}
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="saveAgentBtn">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <!-- Template Edit Modal -->
+        <div class="modal fade" id="templateEditModal" tabindex="-1" aria-labelledby="templateEditModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="templateEditModalLabel">
+                            <i class="fas fa-layer-group me-2"></i>编辑模板
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="templateEditForm">
+                            <input type="hidden" id="templateId" name="templateId">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="templateName" class="form-label">名称</label>
+                                        <input type="text" class="form-control" id="templateName" name="name" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="templateEnabled" name="enabled" checked>
+                                            <label class="form-check-label" for="templateEnabled">
+                                                启用
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="templateDescription" class="form-label">描述</label>
+                                <textarea class="form-control" id="templateDescription" name="description" rows="2" required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">选择智能体</label>
+                                <div id="templateAgentsSelection">
+                                    <!-- Agent checkboxes will be loaded here -->
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-primary" id="saveTemplateBtn">保存</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Agent Template Configuration Modal -->
+        <div class="modal fade" id="agentTemplateConfigModal" tabindex="-1" aria-labelledby="agentTemplateConfigModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="agentTemplateConfigModalLabel">
+                            <i class="fas fa-cog me-2"></i>智能体模板配置
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="modalAgentDefaultModel" class="form-label">默认模型</label>
+                                    <select class="form-select" id="modalAgentDefaultModel">
+                                        <option value="openai">OpenAI</option>
+                                        <option value="gemini">Google Gemini</option>
+                                        <option value="ollama">Ollama (本地)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="modalAgentTemperature" class="form-label">温度 (Temperature)</label>
+                                    <input type="range" class="form-range" id="modalAgentTemperature" min="0" max="1" step="0.1" value="0.7">
+                                    <small class="form-text text-muted">当前值: <span id="modalTemperatureValue">0.7</span></small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="modalAgentMaxTokens" class="form-label">最大令牌数</label>
+                                    <input type="number" class="form-control" id="modalAgentMaxTokens" min="100" max="4000" value="2000">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="modalAgentTimeout" class="form-label">超时时间 (秒)</label>
+                                    <input type="number" class="form-control" id="modalAgentTimeout" min="30" max="600" value="300">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="modalAgentDeepResearch" checked>
+                                    <label class="form-check-label" for="modalAgentDeepResearch">
+                                        启用深度研究
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="modalAgentWebSearch" checked>
+                                    <label class="form-check-label" for="modalAgentWebSearch">
+                                        启用网络搜索
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3" id="modalAgentWebSearchConfig" style="display: none;">
+                            <div class="col-12">
+                                <div class="card border-secondary">
+                                    <div class="card-header bg-secondary text-white">
+                                        <h6 class="mb-0">网络搜索配置</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <label for="modalAgentSearchEngine" class="form-label">搜索引擎</label>
+                                                <select class="form-select" id="modalAgentSearchEngine">
+                                                    <option value="duckduckgo">DuckDuckGo</option>
+                                                    <option value="google">Google</option>
+                                                    <option value="bing">Bing</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="modalAgentSearchResults" class="form-label">搜索结果数量</label>
+                                                <input type="number" class="form-control" id="modalAgentSearchResults" min="1" max="20" value="10">
+                                            </div>
+                                        </div>
+                                        <div class="row mt-2">
+                                            <div class="col-12">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="modalAgentIncludeImages">
+                                                    <label class="form-check-label" for="modalAgentIncludeImages">
+                                                        包含图片搜索
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="saveModalAgentTemplateConfig">
+                            <i class="fas fa-save me-2"></i>保存模板配置
+                        </button>
+                        <button type="button" class="btn btn-secondary" id="resetModalAgentTemplateConfig">
+                            <i class="fas fa-undo me-2"></i>重置为默认
+                        </button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        class ResearchAssistant {
+            constructor() {
+                this.selectedAgents = [];
+                this.selectedModel = 'openai'; // Default model
+                this.selectedOllamaModel = null;
+                this.selectedOpenAIModel = 'gpt-4o'; // Default OpenAI model
+                this.selectedGeminiModel = 'gemini-1.5-pro'; // Default Gemini model
+                this.availableAgents = [];
+                this.availableModels = [];
+                this.availableOllamaModels = [];
+                this.currentSessionId = null;
+                this.isContinuation = false;
+                this.init();
+            }
+
+            async init() {
+                await this.loadAgents();
+                await this.loadModels();
+                await this.loadOllamaModels();
+                this.setupEventListeners();
+                
+                // Set initial displays
+                document.getElementById('selectedModelDisplay').textContent = this.getModelDisplayName(this.selectedModel);
+                this.updateSelectedAgentsDisplay();
+            }
+
+            async loadAgents() {
+                try {
+                    const response = await fetch('/api/agents');
+                    const data = await response.json();
+                    this.availableAgents = data.agents;
+                    this.renderAgents();
+                } catch (error) {
+                    console.error('Failed to load agents:', error);
+                }
+            }
+
+            async loadModels() {
+                try {
+                    const response = await fetch('/api/models');
+                    const data = await response.json();
+                    this.availableModels = data.models;
+                    this.renderModels();
+                } catch (error) {
+                    console.error('Failed to load models:', error);
+                }
+            }
+
+            async loadOllamaModels() {
+                try {
+                    const response = await fetch('/api/ollama-models');
+                    const data = await response.json();
+                    if (data.success) {
+                        this.availableOllamaModels = data.models;
+                        this.renderOllamaModels();
+                    } else {
+                        console.error('Failed to load Ollama models:', data.error);
+                        this.availableOllamaModels = [];
+                    }
+                } catch (error) {
+                    console.error('Failed to load Ollama models:', error);
+                    this.availableOllamaModels = [];
+                }
+            }
+
+            renderAgents() {
+                const container = document.getElementById('agentSelection');
+                container.innerHTML = '';
+
+                this.availableAgents.forEach(agent => {
+                    const agentCard = document.createElement('div');
+                    agentCard.className = 'col-md-6 col-lg-3 mb-3';
+                    agentCard.innerHTML = `
+                        <div class="card agent-card h-100" data-agent="${agent.agent_id}">
+                            <div class="card-body text-center">
+                                <i class="fas fa-${agent.icon} fa-2x mb-3 text-${agent.color}"></i>
+                                <h6 class="card-title">${agent.name}</h6>
+                                <p class="card-text small">${agent.description}</p>
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input agent-radio" type="radio" name="selectedAgent" id="agent-${agent.agent_id}" value="${agent.agent_id}">
+                                    <label class="form-check-label small" for="agent-${agent.agent_id}">
+                                        选择此智能体
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(agentCard);
+
+                    // Add click event to the card
+                    const cardElement = agentCard.querySelector('.agent-card');
+                    cardElement.addEventListener('click', (e) => {
+                        // Don't trigger if clicking on radio
+                        if (e.target.type === 'radio') return;
+
+                        this.selectAgent(agent.agent_id, cardElement);
+                    });
+
+                    // Add change event to radio
+                    const radio = agentCard.querySelector('input[type="radio"]');
+                    radio.addEventListener('change', (e) => {
+                        this.selectAgent(agent.agent_id, cardElement);
+                    });
+                });
+            }
+
+            renderModels() {
+                const container = document.getElementById('modelSelection');
+                container.innerHTML = '';
+
+                this.availableModels.forEach(model => {
+                    const modelCard = document.createElement('div');
+                    modelCard.className = 'col-md-4 mb-3';
+                    modelCard.innerHTML = `
+                        <div class="card model-card h-100 ${model.name === this.selectedModel ? 'selected' : ''}" data-model="${model.name}">
+                            <div class="card-body text-center">
+                                <i class="fas fa-${model.type === 'local' ? 'desktop' : 'cloud'} fa-2x mb-2 ${model.status === 'available' ? 'text-success' : 'text-danger'}"></i>
+                                <h6 class="card-title">${this.getModelDisplayName(model.name)}</h6>
+                                <p class="card-text small">
+                                    <span class="model-status ${model.status === 'available' ? 'status-available' : 'status-unavailable'}">
+                                        <i class="fas fa-circle me-1"></i>
+                                        ${model.status === 'available' ? '可用' : '不可用'}
+                                    </span>
+                                </p>
+                                ${model.status === 'available' ? 
+                                    '<div class="form-check mt-2"><input class="form-check-input" type="radio" name="modelSelection" value="' + model.name + '" ' + (model.name === this.selectedModel ? 'checked' : '') + '></div>' : 
+                                    '<div class="text-muted small">不可选择</div>'
+                                }
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(modelCard);
+
+                    // Add click event for available models
+                    if (model.status === 'available') {
+                        modelCard.addEventListener('click', () => {
+                            this.selectModel(model.name, modelCard);
+                        });
+                    }
+                });
+            }
+
+            renderOllamaModels() {
+                const container = document.getElementById('ollamaModelSelection');
+                container.innerHTML = '';
+
+                if (this.availableOllamaModels.length === 0) {
+                    container.innerHTML = '<div class="col-12 text-center text-muted">没有可用的Ollama模型</div>';
+                    return;
+                }
+
+                this.availableOllamaModels.forEach(model => {
+                    const modelCard = document.createElement('div');
+                    modelCard.className = 'col-md-6 col-lg-4 mb-3';
+                    modelCard.innerHTML = `
+                        <div class="card ollama-model-card h-100 ${model.name === this.selectedOllamaModel ? 'selected' : ''}" data-ollama-model="${model.name}">
+                            <div class="card-body text-center">
+                                <i class="fas fa-desktop fa-2x mb-2 text-info"></i>
+                                <h6 class="card-title">${model.name}</h6>
+                                <p class="card-text small">
+                                    <span class="badge bg-secondary">${model.size_gb} GB</span>
+                                </p>
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="radio" name="ollamaModelSelection" value="${model.name}" ${model.name === this.selectedOllamaModel ? 'checked' : ''}>
+                                    <label class="form-check-label small">选择此模型</label>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(modelCard);
+
+                    // Add click event
+                    const cardElement = modelCard.querySelector('.ollama-model-card');
+                    cardElement.addEventListener('click', (e) => {
+                        if (e.target.type === 'radio') return;
+                        this.selectOllamaModel(model.name, cardElement);
+                    });
+
+                    // Add change event to radio
+                    const radio = modelCard.querySelector('input[type="radio"]');
+                    radio.addEventListener('change', (e) => {
+                        this.selectOllamaModel(model.name, cardElement);
+                    });
+                });
+            }
+
+            renderOpenAIModels() {
+                const container = document.getElementById('openaiModelSelection');
+                container.innerHTML = '';
+
+                const openaiModels = [
+                    { name: 'gpt-4o', display: 'GPT-4o', description: '最新多模态模型' },
+                    { name: 'gpt-4o-mini', display: 'GPT-4o Mini', description: '轻量级GPT-4o' },
+                    { name: 'gpt-4-turbo', display: 'GPT-4 Turbo', description: '高性能GPT-4' },
+                    { name: 'gpt-4', display: 'GPT-4', description: '标准GPT-4模型' },
+                    { name: 'gpt-3.5-turbo', display: 'GPT-3.5 Turbo', description: '快速响应模型' }
+                ];
+
+                openaiModels.forEach(model => {
+                    const modelCard = document.createElement('div');
+                    modelCard.className = 'col-md-6 col-lg-4 mb-3';
+                    modelCard.innerHTML = `
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-brain fa-2x mb-2 text-success"></i>
+                                <h6 class="card-title">${model.display}</h6>
+                                <p class="card-text small text-muted">${model.description}</p>
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="radio" name="openaiModelSelection" value="${model.name}" ${model.name === this.selectedOpenAIModel ? 'checked' : ''}>
+                                    <label class="form-check-label small">选择此模型</label>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(modelCard);
+
+                    // Add change event to radio
+                    const radio = modelCard.querySelector('input[type="radio"]');
+                    radio.addEventListener('change', (e) => {
+                        this.selectOpenAIModel(model.name);
+                    });
+                });
+            }
+
+            renderGeminiModels() {
+                const container = document.getElementById('geminiModelSelection');
+                container.innerHTML = '';
+
+                const geminiModels = [
+                    { name: 'gemini-1.5-pro', display: 'Gemini 1.5 Pro', description: '最新专业模型' },
+                    { name: 'gemini-1.5-flash', display: 'Gemini 1.5 Flash', description: '快速响应模型' },
+                    { name: 'gemini-pro-vision', display: 'Gemini Pro Vision', description: '多模态视觉模型' },
+                    { name: 'gemini-pro', display: 'Gemini Pro', description: '标准专业模型' }
+                ];
+
+                geminiModels.forEach(model => {
+                    const modelCard = document.createElement('div');
+                    modelCard.className = 'col-md-6 col-lg-4 mb-3';
+                    modelCard.innerHTML = `
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-gem fa-2x mb-2 text-warning"></i>
+                                <h6 class="card-title">${model.display}</h6>
+                                <p class="card-text small text-muted">${model.description}</p>
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="radio" name="geminiModelSelection" value="${model.name}" ${model.name === this.selectedGeminiModel ? 'checked' : ''}>
+                                    <label class="form-check-label small">选择此模型</label>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(modelCard);
+
+                    // Add change event to radio
+                    const radio = modelCard.querySelector('input[type="radio"]');
+                    radio.addEventListener('change', (e) => {
+                        this.selectGeminiModel(model.name);
+                    });
+                });
+            }
+
+            getAgentIcon(agentId) {
+                // Find agent by ID from available agents
+                const agent = this.availableAgents.find(a => a.agent_id === agentId);
+                return agent ? agent.icon : 'robot';
+            }
+
+            getAgentDisplayName(agentId) {
+                // Find agent by ID from available agents
+                const agent = this.availableAgents.find(a => a.agent_id === agentId);
+                return agent ? agent.name : agentId;
+            }
+
+            getModelDisplayName(modelName) {
+                const names = {
+                    'ollama': 'Ollama (本地)',
+                    'openai': 'OpenAI GPT',
+                    'gemini': 'Google Gemini'
+                };
+                return names[modelName] || modelName;
+            }
+
+            selectModel(modelName, modelCard) {
+                // Remove selection from all model cards
+                document.querySelectorAll('.model-card').forEach(card => {
+                    card.classList.remove('selected');
+                    const radio = card.querySelector('input[type="radio"]');
+                    if (radio) radio.checked = false;
+                });
+                
+                // Select the clicked model
+                this.selectedModel = modelName;
+                modelCard.classList.add('selected');
+                const radio = modelCard.querySelector('input[type="radio"]');
+                if (radio) radio.checked = true;
+                
+                // Show/hide model-specific sections based on selected model
+                const ollamaSection = document.getElementById('ollamaModelSection');
+                const openaiSection = document.getElementById('openaiModelSection');
+                const geminiSection = document.getElementById('geminiModelSection');
+                
+                // Hide all sections first
+                ollamaSection.style.display = 'none';
+                openaiSection.style.display = 'none';
+                geminiSection.style.display = 'none';
+                
+                if (modelName === 'ollama') {
+                    ollamaSection.style.display = 'block';
+                    this.selectedOllamaModel = null;
+                } else if (modelName === 'openai') {
+                    openaiSection.style.display = 'block';
+                    this.renderOpenAIModels();
+                } else if (modelName === 'gemini') {
+                    geminiSection.style.display = 'block';
+                    this.renderGeminiModels();
+                }
+                
+                // Update display
+                document.getElementById('selectedModelDisplay').textContent = this.getModelDisplayName(modelName);
+            }
+
+            selectOllamaModel(modelName, modelCard) {
+                // Remove selection from all Ollama model cards
+                document.querySelectorAll('.ollama-model-card').forEach(card => {
+                    card.classList.remove('selected');
+                    const radio = card.querySelector('input[type="radio"]');
+                    if (radio) radio.checked = false;
+                });
+                
+                // Select the clicked Ollama model
+                this.selectedOllamaModel = modelName;
+                modelCard.classList.add('selected');
+                const radio = modelCard.querySelector('input[type="radio"]');
+                if (radio) radio.checked = true;
+                
+                // Update display
+                document.getElementById('selectedModelDisplay').textContent = `Ollama (${modelName})`;
+            }
+
+            selectOpenAIModel(modelName) {
+                this.selectedOpenAIModel = modelName;
+                // Update display
+                document.getElementById('selectedModelDisplay').textContent = `OpenAI (${this.getOpenAIModelDisplayName(modelName)})`;
+            }
+
+            selectGeminiModel(modelName) {
+                this.selectedGeminiModel = modelName;
+                // Update display
+                document.getElementById('selectedModelDisplay').textContent = `Google Gemini (${this.getGeminiModelDisplayName(modelName)})`;
+            }
+
+            getOpenAIModelDisplayName(modelName) {
+                const names = {
+                    'gpt-4o': 'GPT-4o',
+                    'gpt-4o-mini': 'GPT-4o Mini',
+                    'gpt-4-turbo': 'GPT-4 Turbo',
+                    'gpt-4': 'GPT-4',
+                    'gpt-3.5-turbo': 'GPT-3.5 Turbo'
+                };
+                return names[modelName] || modelName;
+            }
+
+            getGeminiModelDisplayName(modelName) {
+                const names = {
+                    'gemini-1.5-pro': 'Gemini 1.5 Pro',
+                    'gemini-1.5-flash': 'Gemini 1.5 Flash',
+                    'gemini-pro-vision': 'Gemini Pro Vision',
+                    'gemini-pro': 'Gemini Pro'
+                };
+                return names[modelName] || modelName;
+            }
+
+            selectAgent(agentId, agentCard) {
+                console.log(`selectAgent called: ${agentId}, current selected: ${this.selectedAgents.join(', ')}`);
+
+                // Clear previous selection
+                this.clearAgentSelection();
+
+                // Select new agent
+                this.selectedAgents = [agentId];
+                agentCard.classList.add('selected');
+                const radio = agentCard.querySelector('input[type="radio"]');
+                if (radio) radio.checked = true;
+
+                console.log(`Selected agent: ${agentId}`);
+
+                // Load default settings from agent template config
+                this.loadAgentDefaults(agentId);
+
+                // Update selected agents display
+                this.updateSelectedAgentsDisplay();
+
+                console.log(`Final selected agent: ${this.selectedAgents.join(', ')}`);
+            }
+
+            clearAgentSelection() {
+                // Clear all selected agents
+                document.querySelectorAll('.agent-card.selected').forEach(card => {
+                    card.classList.remove('selected');
+                });
+                document.querySelectorAll('.agent-radio').forEach(radio => {
+                    radio.checked = false;
+                });
+                this.selectedAgents = [];
+            }
+
+            async loadAgentDefaults(agentId) {
+                // Load default deep research settings from agent template config
+                try {
+                    const response = await fetch(`/api/agents/${agentId}/defaults`);
+                    const data = await response.json();
+
+                    if (data.defaults) {
+                        // Apply defaults to UI controls
+                        const defaults = data.defaults;
+
+                        // Update checkboxes
+                        const enableDeepResearch = document.getElementById('enableDeepResearch');
+                        const enableWebSearch = document.getElementById('enableWebSearch');
+
+                        if (enableDeepResearch) enableDeepResearch.checked = defaults.enableDeepResearch;
+                        if (enableWebSearch) enableWebSearch.checked = defaults.enableWebSearch;
+
+                        // Update search engine
+                        const searchEngine = document.getElementById('searchEngine');
+                        if (searchEngine) {
+                            searchEngine.value = defaults.searchEngine;
+                        }
+
+                        // Update search results count
+                        const searchResults = document.getElementById('searchResults');
+                        if (searchResults) {
+                            searchResults.value = defaults.searchResults;
+                        }
+
+                        // Update include images
+                        const includeImages = document.getElementById('includeImages');
+                        if (includeImages) includeImages.checked = defaults.includeImages;
+
+                        // Update web search options visibility
+                        this.toggleWebSearchOptions(defaults.enableWebSearch);
+
+                        console.log(`Loaded defaults for agent ${agentId}:`, defaults);
+                    }
+                } catch (error) {
+                    console.error('Failed to load agent defaults:', error);
+                }
+            }
+
+            updateSelectedAgentsDisplay() {
+                const displayElement = document.getElementById('selectedAgentsDisplay');
+                if (displayElement) {
+                    if (this.selectedAgents.length > 0) {
+                        const agentName = this.getAgentDisplayName(this.selectedAgents[0]);
+                        displayElement.textContent = `已选择智能体: ${agentName}`;
+                        displayElement.style.color = '#007bff';
+                    } else {
+                        displayElement.textContent = '请选择一个智能体';
+                        displayElement.style.color = '#dc3545';
+                    }
+                }
+            }
+
+            setupEventListeners() {
+                document.getElementById('startResearch').addEventListener('click', () => {
+                    this.startResearch();
+                });
+
+                // Continue research functionality
+                document.getElementById('continueResearchBtn').addEventListener('click', () => {
+                    this.showContinueResearchSection();
+                });
+
+                document.getElementById('cancelContinueResearch').addEventListener('click', () => {
+                    this.hideContinueResearchSection();
+                });
+
+                document.getElementById('submitContinueResearch').addEventListener('click', () => {
+                    this.submitContinueResearch();
+                });
+
+                // Export conversation functionality
+                document.getElementById('exportConversationBtn').addEventListener('click', () => {
+                    this.exportConversation();
+                });
+
+                // Deep research functionality
+                document.getElementById('enableWebSearch').addEventListener('change', (e) => {
+                    this.toggleWebSearchOptions(e.target.checked);
+                });
+
+                // Agent management functionality
+                document.getElementById('agentManagementBtn').addEventListener('click', () => {
+                    this.showAgentManagement();
+                });
+
+                document.getElementById('addAgentBtn').addEventListener('click', () => {
+                    this.showAgentEditModal();
+                });
+
+                document.getElementById('addTemplateBtn').addEventListener('click', () => {
+                    this.showTemplateEditModal();
+                });
+
+                document.getElementById('saveAgentBtn').addEventListener('click', () => {
+                    this.saveAgent();
+                });
+
+                document.getElementById('saveTemplateBtn').addEventListener('click', () => {
+                    this.saveTemplate();
+                });
+
+                // Agent template configuration functionality (Modal)
+                document.getElementById('modalAgentWebSearch').addEventListener('change', (e) => {
+                    this.toggleModalAgentWebSearchConfig(e.target.checked);
+                });
+
+                document.getElementById('modalAgentTemperature').addEventListener('input', (e) => {
+                    document.getElementById('modalTemperatureValue').textContent = e.target.value;
+                });
+
+                document.getElementById('saveModalAgentTemplateConfig').addEventListener('click', () => {
+                    this.saveModalAgentTemplateConfig();
+                });
+
+                document.getElementById('resetModalAgentTemplateConfig').addEventListener('click', () => {
+                    this.resetModalAgentTemplateConfig();
+                });
+            }
+
+            async startResearch() {
+                const query = document.getElementById('researchQuery').value.trim();
+                if (!query) {
+                    alert('请输入研究问题');
+                    return;
+                }
+
+                if (this.selectedAgents.length === 0) {
+                    alert('请至少选择一个智能体');
+                    return;
+                }
+
+                this.showLoading(true);
+                this.hideResults();
+
+                try {
+                    // Get deep research options
+                    const deepResearchOptions = this.getDeepResearchOptions();
+                    
+                    const response = await fetch('/api/research', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            query: query,
+                            agents: this.selectedAgents,
+                            model: this.selectedModel,
+                            ollamaModel: this.selectedOllamaModel,
+                            openaiModel: this.selectedOpenAIModel,
+                            geminiModel: this.selectedGeminiModel,
+                            isContinuation: this.isContinuation,
+                            sessionId: this.currentSessionId,
+                            deepResearch: deepResearchOptions
+                        })
+                    });
+
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Update session information
+                        this.currentSessionId = data.sessionId;
+                        this.displayResults(data.result, data.sessionId);
+                    } else {
+                        throw new Error(data.error || '研究失败');
+                    }
+                } catch (error) {
+                    console.error('Research failed:', error);
+                    alert('研究失败: ' + error.message);
+                } finally {
+                    this.showLoading(false);
+                }
+            }
+
+            showLoading(show) {
+                const spinner = document.getElementById('loadingSpinner');
+                spinner.style.display = show ? 'flex' : 'none';
+            }
+
+            hideResults() {
+                document.getElementById('resultsSection').style.display = 'none';
+            }
+
+            displayResults(results, sessionId) {
+                const container = document.getElementById('researchResults');
+                container.innerHTML = '';
+
+                // Display web search results if available
+                if (results.web_search_results && results.web_search_results.length > 0) {
+                    const searchCard = document.createElement('div');
+                    searchCard.className = 'card mb-4 border-info';
+                    searchCard.innerHTML = `
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0"><i class="fas fa-globe me-2"></i>网络搜索结果</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                ${results.web_search_results.map(result => `
+                                    <div class="col-md-6 mb-3">
+                                        <div class="card h-100">
+                                            <div class="card-body">
+                                                <h6 class="card-title">
+                                                    <a href="${result.url}" target="_blank" class="text-decoration-none">
+                                                        ${result.title}
+                                                    </a>
+                                                </h6>
+                                                <p class="card-text small">${result.snippet}</p>
+                                                <small class="text-muted">来源: ${result.source}</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(searchCard);
+                }
+
+                // Display summary
+                if (results.summary) {
+                    const summaryCard = document.createElement('div');
+                    summaryCard.className = 'card mb-4';
+                    summaryCard.innerHTML = `
+                        <div class="card-header bg-primary text-white">
+                            <h6 class="mb-0"><i class="fas fa-compress-arrows-alt me-2"></i>综合总结</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="whitespace-pre-line">${results.summary}</div>
+                        </div>
+                    `;
+                    container.appendChild(summaryCard);
+                }
+
+                // Display individual agent results
+                results.results.forEach(result => {
+                    const resultCard = document.createElement('div');
+                    resultCard.className = 'card mb-3';
+                    resultCard.innerHTML = `
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-${this.getAgentIcon(result.agent)} me-2"></i>
+                                ${this.getAgentDisplayName(result.agent)}
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            ${result.error ? 
+                                `<div class="alert alert-danger">错误: ${result.error}</div>` :
+                                `<div class="whitespace-pre-line">${result.response}</div>`
+                            }
+                        </div>
+                    `;
+                    container.appendChild(resultCard);
+                });
+
+                // Show continue research and export buttons
+                if (sessionId) {
+                    document.getElementById('continueResearchBtn').style.display = 'inline-block';
+                    document.getElementById('exportConversationBtn').style.display = 'inline-block';
+                }
+
+                document.getElementById('resultsSection').style.display = 'block';
+            }
+
+            showContinueResearchSection() {
+                document.getElementById('continueResearchSection').style.display = 'block';
+                
+                // Render agent and model selection for continue research
+                this.renderContinueAgents();
+                this.renderContinueModels();
+                
+                // Check if current model is Ollama and show Ollama model selection
+                if (this.selectedModel === 'ollama') {
+                    const ollamaSection = document.getElementById('continueOllamaModelSection');
+                    ollamaSection.style.display = 'block';
+                    this.renderContinueOllamaModels();
+                }
+                
+                document.getElementById('continueQuery').focus();
+            }
+
+            hideContinueResearchSection() {
+                document.getElementById('continueResearchSection').style.display = 'none';
+                document.getElementById('continueQuery').value = '';
+            }
+
+            async submitContinueResearch() {
+                const query = document.getElementById('continueQuery').value.trim();
+                if (!query) {
+                    alert('请输入继续研究的问题');
+                    return;
+                }
+
+                // Get selected agents and models for continue research
+                const continueAgent = this.getContinueSelectedAgent();
+                const continueModel = this.getContinueSelectedModel();
+                const continueOllamaModel = this.getContinueSelectedOllamaModel();
+
+                if (!continueAgent) {
+                    alert('请选择一个智能体');
+                    return;
+                }
+
+                this.isContinuation = true;
+                this.showContinueLoading(true);
+                
+                // Don't hide the section immediately, wait for results
+
+                try {
+                    const response = await fetch('/api/research', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            query: query,
+                            agents: [continueAgent],
+                            model: continueModel,
+                            ollamaModel: continueOllamaModel,
+                            isContinuation: true,
+                            sessionId: this.currentSessionId
+                        })
+                    });
+
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.currentSessionId = data.sessionId;
+                        
+                        // Hide continue section only after successful response
+                        this.hideContinueResearchSection();
+                        
+                        // Display results with turn indicator
+                        this.displayContinueResults(data.result, data.sessionId, data.turnId);
+                    } else {
+                        throw new Error(data.error || '继续研究失败');
+                    }
+                } catch (error) {
+                    console.error('Continue research failed:', error);
+                    alert('继续研究失败: ' + error.message);
+                } finally {
+                    this.showContinueLoading(false);
+                    this.isContinuation = false;
+                }
+            }
+
+            showContinueLoading(show) {
+                const spinner = document.getElementById('continueLoadingSpinner');
+                spinner.style.display = show ? 'flex' : 'none';
+            }
+
+            addTurnIndicator(turnId) {
+                const container = document.getElementById('researchResults');
+                const turnIndicator = document.createElement('div');
+                turnIndicator.className = 'alert alert-info mb-3';
+                turnIndicator.innerHTML = `
+                    <i class="fas fa-comments me-2"></i>
+                    <strong>对话轮次 ${turnId.substring(0, 8)}...</strong> - 基于之前的研究结果
+                `;
+                container.insertBefore(turnIndicator, container.firstChild);
+            }
+
+            async exportConversation() {
+                if (!this.currentSessionId) {
+                    alert('没有可导出的对话');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/api/conversation/${this.currentSessionId}/export`);
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Create and download JSON file
+                        const blob = new Blob([JSON.stringify(data.session, null, 2)], {type: 'application/json'});
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `conversation_${this.currentSessionId.substring(0, 8)}_${new Date().toISOString().split('T')[0]}.json`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                        
+                        alert('对话已导出成功！');
+                    } else {
+                        throw new Error(data.error || '导出失败');
+                    }
+                } catch (error) {
+                    console.error('Export failed:', error);
+                    alert('导出失败: ' + error.message);
+                }
+            }
+
+            // Continue research specific methods
+            renderContinueAgents() {
+                const container = document.getElementById('continueAgentSelection');
+                container.innerHTML = '';
+
+                this.availableAgents.forEach(agent => {
+                    const agentCard = document.createElement('div');
+                    agentCard.className = 'col-md-3 mb-2';
+                    agentCard.innerHTML = `
+                        <div class="form-check">
+                            <input class="form-check-input continue-agent-radio" type="radio" name="continueSelectedAgent"
+                                   value="${agent.agent_id}" id="continueAgent_${agent.agent_id}"
+                                   ${this.selectedAgents.includes(agent.agent_id) ? 'checked' : ''}>
+                            <label class="form-check-label" for="continueAgent_${agent.agent_id}">
+                                <i class="fas fa-${this.getAgentIcon(agent.name)} me-1"></i>
+                                ${this.getAgentDisplayName(agent.name)}
+                            </label>
+                        </div>
+                    `;
+                    container.appendChild(agentCard);
+                });
+            }
+
+            renderContinueModels() {
+                const container = document.getElementById('continueModelSelection');
+                container.innerHTML = '';
+
+                this.availableModels.forEach(model => {
+                    if (model.status === 'available') {
+                        const modelCard = document.createElement('div');
+                        modelCard.className = 'col-md-4 mb-2';
+                        modelCard.innerHTML = `
+                            <div class="form-check">
+                                <input class="form-check-input continue-model-radio" type="radio" 
+                                       name="continueModelSelection" value="${model.name}" 
+                                       id="continueModel_${model.name}"
+                                       ${model.name === this.selectedModel ? 'checked' : ''}>
+                                <label class="form-check-label" for="continueModel_${model.name}">
+                                    <i class="fas fa-${model.type === 'local' ? 'desktop' : 'cloud'} me-1"></i>
+                                    ${this.getModelDisplayName(model.name)}
+                                </label>
+                            </div>
+                        `;
+                        container.appendChild(modelCard);
+                        
+                        // Add change event listener
+                        const radio = modelCard.querySelector('input[type="radio"]');
+                        radio.addEventListener('change', () => {
+                            this.handleContinueModelChange(model.name);
+                        });
+                    }
+                });
+            }
+
+            handleContinueModelChange(modelName) {
+                const ollamaSection = document.getElementById('continueOllamaModelSection');
+                if (modelName === 'ollama') {
+                    ollamaSection.style.display = 'block';
+                    this.renderContinueOllamaModels();
+                } else {
+                    ollamaSection.style.display = 'none';
+                }
+            }
+
+            renderContinueOllamaModels() {
+                const container = document.getElementById('continueOllamaModelSelection');
+                container.innerHTML = '';
+
+                if (this.availableOllamaModels.length === 0) {
+                    container.innerHTML = '<div class="col-12 text-center text-muted">没有可用的Ollama模型</div>';
+                    return;
+                }
+
+                this.availableOllamaModels.forEach(model => {
+                    const modelCard = document.createElement('div');
+                    modelCard.className = 'col-md-6 col-lg-4 mb-3';
+                    modelCard.innerHTML = `
+                        <div class="form-check">
+                            <input class="form-check-input continue-ollama-model-radio" type="radio" 
+                                   name="continueOllamaModelSelection" value="${model.name}" 
+                                   id="continueOllamaModel_${model.name}"
+                                   ${model.name === this.selectedOllamaModel ? 'checked' : ''}>
+                            <label class="form-check-label" for="continueOllamaModel_${model.name}">
+                                <i class="fas fa-desktop me-1"></i>
+                                ${model.name} (${model.size_gb} GB)
+                            </label>
+                        </div>
+                    `;
+                    container.appendChild(modelCard);
+                });
+            }
+
+            getContinueSelectedAgent() {
+                const radio = document.querySelector('.continue-agent-radio:checked');
+                return radio ? radio.value : null;
+            }
+
+            getContinueSelectedModel() {
+                const radio = document.querySelector('.continue-model-radio:checked');
+                return radio ? radio.value : this.selectedModel;
+            }
+
+            getContinueSelectedOllamaModel() {
+                const radio = document.querySelector('.continue-ollama-model-radio:checked');
+                return radio ? radio.value : this.selectedOllamaModel;
+            }
+
+            displayContinueResults(results, sessionId, turnId) {
+                const container = document.getElementById('researchResults');
+                
+                // Add turn indicator at the top
+                const turnIndicator = document.createElement('div');
+                turnIndicator.className = 'alert alert-info mb-3';
+                turnIndicator.innerHTML = `
+                    <i class="fas fa-comments me-2"></i>
+                    <strong>对话轮次 ${turnId.substring(0, 8)}...</strong> - 基于之前的研究结果
+                `;
+                container.insertBefore(turnIndicator, container.firstChild);
+
+                // Display summary
+                if (results.summary) {
+                    const summaryCard = document.createElement('div');
+                    summaryCard.className = 'card mb-4';
+                    summaryCard.innerHTML = `
+                        <div class="card-header bg-primary text-white">
+                            <h6 class="mb-0"><i class="fas fa-compress-arrows-alt me-2"></i>综合总结</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="whitespace-pre-line">${results.summary}</div>
+                        </div>
+                    `;
+                    container.appendChild(summaryCard);
+                }
+
+                // Display individual agent results
+                results.results.forEach(result => {
+                    const resultCard = document.createElement('div');
+                    resultCard.className = 'card mb-3';
+                    resultCard.innerHTML = `
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-${this.getAgentIcon(result.agent)} me-2"></i>
+                                ${this.getAgentDisplayName(result.agent)}
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            ${result.error ? 
+                                `<div class="alert alert-danger">错误: ${result.error}</div>` :
+                                `<div class="whitespace-pre-line">${result.response}</div>`
+                            }
+                        </div>
+                    `;
+                    container.appendChild(resultCard);
+                });
+
+                // Show continue research and export buttons
+                if (sessionId) {
+                    document.getElementById('continueResearchBtn').style.display = 'inline-block';
+                    document.getElementById('exportConversationBtn').style.display = 'inline-block';
+                }
+
+                document.getElementById('resultsSection').style.display = 'block';
+            }
+
+            // Deep research helper methods
+            toggleWebSearchOptions(enabled) {
+                const webSearchOptions = document.getElementById('webSearchOptions');
+                webSearchOptions.style.display = enabled ? 'block' : 'none';
+            }
+
+            getDeepResearchOptions() {
+                return {
+                    enableDeepResearch: document.getElementById('enableDeepResearch').checked,
+                    enableWebSearch: document.getElementById('enableWebSearch').checked,
+                    searchEngine: document.getElementById('searchEngine').value,
+                    searchResults: parseInt(document.getElementById('searchResults').value),
+                    includeImages: document.getElementById('includeImages').checked
+                };
+            }
+
+            // Agent Management Methods
+            async showAgentManagement() {
+                const modal = new bootstrap.Modal(document.getElementById('agentManagementModal'));
+                await this.loadAgentsList();
+                await this.loadTemplatesList();
+                modal.show();
+            }
+
+            async loadAgentsList() {
+                try {
+                    const response = await fetch('/api/agents');
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.renderAgentsList(data.agents);
+                    } else {
+                        console.error('Failed to load agents:', data.error);
+                    }
+                } catch (error) {
+                    console.error('Failed to load agents:', error);
+                }
+            }
+
+            async loadTemplatesList() {
+                try {
+                    const response = await fetch('/api/templates');
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.renderTemplatesList(data.templates);
+                    } else {
+                        console.error('Failed to load templates:', data.error);
+                    }
+                } catch (error) {
+                    console.error('Failed to load templates:', error);
+                }
+            }
+
+            renderAgentsList(agents) {
+                const container = document.getElementById('agentsList');
+                container.innerHTML = '';
+
+                agents.forEach(agent => {
+                    const agentCard = document.createElement('div');
+                    agentCard.className = 'col-md-6 col-lg-4 mb-3';
+                    agentCard.innerHTML = `
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-${agent.icon} fa-2x text-${agent.color} me-3"></i>
+                                    <div>
+                                        <h6 class="card-title mb-0">${agent.name}</h6>
+                                        <small class="text-muted">${agent.enabled ? '已启用' : '已禁用'}</small>
+                                    </div>
+                                </div>
+                                <p class="card-text small">${agent.description}</p>
+                                <div class="d-flex justify-content-between">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="researchAssistant.editAgent('${agent.agent_id}')">
+                                        <i class="fas fa-edit me-1"></i>编辑
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-info" onclick="researchAssistant.showAgentTemplateConfig('${agent.agent_id}')">
+                                        <i class="fas fa-cog me-1"></i>模板配置
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="researchAssistant.deleteAgent('${agent.agent_id}')">
+                                        <i class="fas fa-trash me-1"></i>删除
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(agentCard);
+                });
+            }
+
+            renderTemplatesList(templates) {
+                const container = document.getElementById('templatesList');
+                container.innerHTML = '';
+
+                templates.forEach(template => {
+                    const templateCard = document.createElement('div');
+                    templateCard.className = 'col-md-6 col-lg-4 mb-3';
+                    templateCard.innerHTML = `
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h6 class="card-title">${template.name}</h6>
+                                <p class="card-text small">${template.description}</p>
+                                <div class="mb-2">
+                                    <small class="text-muted">智能体: ${template.agents.join(', ')}</small>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="researchAssistant.editTemplate('${template.template_id}')">
+                                        <i class="fas fa-edit me-1"></i>编辑
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="researchAssistant.deleteTemplate('${template.template_id}')">
+                                        <i class="fas fa-trash me-1"></i>删除
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(templateCard);
+                });
+            }
+
+            async loadTemplates() {
+                try {
+                    const response = await fetch('/api/templates');
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.renderTemplateSelection(data.templates);
+                    } else {
+                        console.error('Failed to load templates:', data.error);
+                    }
+                } catch (error) {
+                    console.error('Failed to load templates:', error);
+                }
+            }
+
+            renderTemplateSelection(templates) {
+                const container = document.getElementById('templateSelection');
+                container.innerHTML = '';
+
+                templates.forEach(template => {
+                    if (template.enabled) {
+                        const templateCard = document.createElement('div');
+                        templateCard.className = 'col-md-6 col-lg-4 mb-3';
+                        templateCard.innerHTML = `
+                            <div class="card template-card h-100" data-template-id="${template.template_id}">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-layer-group fa-2x mb-2 text-primary"></i>
+                                    <h6 class="card-title">${template.name}</h6>
+                                    <p class="card-text small">${template.description}</p>
+                                    <div class="form-check mt-2">
+                                        <input class="form-check-input" type="radio" name="templateSelection" value="${template.template_id}">
+                                        <label class="form-check-label small">选择此模板</label>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        container.appendChild(templateCard);
+
+                        // Add click event
+                        templateCard.addEventListener('click', () => {
+                            this.selectTemplate(template.template_id, template.agents);
+                        });
+                    }
+                });
+            }
+
+            selectTemplate(templateId, agentIds) {
+                // Update template selection
+                document.querySelectorAll('.template-card').forEach(card => {
+                    card.classList.remove('selected');
+                });
+                document.querySelector(`[data-template-id="${templateId}"]`).classList.add('selected');
+                
+                // Update radio button
+                document.querySelector(`input[value="${templateId}"]`).checked = true;
+                
+                // Update agent selection
+                this.selectedAgents = agentIds;
+                this.updateAgentSelection();
+            }
+
+            updateAgentSelection() {
+                // Update agent checkboxes based on selected agents
+                document.querySelectorAll('.agent-checkbox').forEach(checkbox => {
+                    checkbox.checked = this.selectedAgents.includes(checkbox.value);
+                });
+                
+                // Update agent cards visual state
+                document.querySelectorAll('.agent-card').forEach(card => {
+                    const agentName = card.dataset.agent;
+                    if (this.selectedAgents.includes(agentName)) {
+                        card.classList.add('selected');
+                    } else {
+                        card.classList.remove('selected');
+                    }
+                });
+                
+                this.updateSelectedAgentsDisplay();
+            }
+
+            showAgentEditModal(agentId = null) {
+                const modal = new bootstrap.Modal(document.getElementById('agentEditModal'));
+                
+                if (agentId) {
+                    // Edit existing agent
+                    this.loadAgentForEdit(agentId);
+                } else {
+                    // Create new agent
+                    this.clearAgentForm();
+                }
+                
+                modal.show();
+            }
+
+            showTemplateEditModal(templateId = null) {
+                const modal = new bootstrap.Modal(document.getElementById('templateEditModal'));
+                
+                if (templateId) {
+                    // Edit existing template
+                    this.loadTemplateForEdit(templateId);
+                } else {
+                    // Create new template
+                    this.clearTemplateForm();
+                }
+                
+                modal.show();
+            }
+
+            async loadAgentForEdit(agentId) {
+                try {
+                    const response = await fetch(`/api/agents/${agentId}`);
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        const agent = data.agent;
+                        document.getElementById('agentId').value = agent.agent_id;
+                        document.getElementById('agentName').value = agent.name;
+                        document.getElementById('agentDescription').value = agent.description;
+                        document.getElementById('agentIcon').value = agent.icon;
+                        document.getElementById('agentColor').value = agent.color;
+                        document.getElementById('agentPrompt').value = agent.prompt_template;
+                        document.getElementById('agentEnabled').checked = agent.enabled;
+                    }
+                } catch (error) {
+                    console.error('Failed to load agent:', error);
+                }
+            }
+
+            async loadTemplateForEdit(templateId) {
+                try {
+                    const response = await fetch(`/api/templates/${templateId}`);
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        const template = data.template;
+                        document.getElementById('templateId').value = template.template_id;
+                        document.getElementById('templateName').value = template.name;
+                        document.getElementById('templateDescription').value = template.description;
+                        document.getElementById('templateEnabled').checked = template.enabled;
+                        
+                        // Load agent selection
+                        await this.loadTemplateAgentSelection(template.agents);
+                    }
+                } catch (error) {
+                    console.error('Failed to load template:', error);
+                }
+            }
+
+            async loadTemplateAgentSelection(selectedAgents = []) {
+                try {
+                    const response = await fetch('/api/agents');
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        const container = document.getElementById('templateAgentsSelection');
+                        container.innerHTML = '';
+                        
+                        data.agents.forEach(agent => {
+                            if (agent.enabled) {
+                                const checkbox = document.createElement('div');
+                                checkbox.className = 'form-check';
+                                checkbox.innerHTML = `
+                                    <input class="form-check-input" type="checkbox" value="${agent.agent_id}" 
+                                           id="templateAgent_${agent.agent_id}" ${selectedAgents.includes(agent.agent_id) ? 'checked' : ''}>
+                                    <label class="form-check-label" for="templateAgent_${agent.agent_id}">
+                                        <i class="fas fa-${agent.icon} me-1"></i>${agent.name}
+                                    </label>
+                                `;
+                                container.appendChild(checkbox);
+                            }
+                        });
+                    }
+                } catch (error) {
+                    console.error('Failed to load agents for template:', error);
+                }
+            }
+
+            clearAgentForm() {
+                document.getElementById('agentId').value = '';
+                document.getElementById('agentName').value = '';
+                document.getElementById('agentDescription').value = '';
+                document.getElementById('agentIcon').value = 'search';
+                document.getElementById('agentColor').value = 'primary';
+                document.getElementById('agentPrompt').value = '';
+                document.getElementById('agentEnabled').checked = true;
+            }
+
+            clearTemplateForm() {
+                document.getElementById('templateId').value = '';
+                document.getElementById('templateName').value = '';
+                document.getElementById('templateDescription').value = '';
+                document.getElementById('templateEnabled').checked = true;
+                document.getElementById('templateAgentsSelection').innerHTML = '';
+            }
+
+            async saveAgent() {
+                const formData = {
+                    name: document.getElementById('agentName').value,
+                    description: document.getElementById('agentDescription').value,
+                    icon: document.getElementById('agentIcon').value,
+                    color: document.getElementById('agentColor').value,
+                    prompt_template: document.getElementById('agentPrompt').value,
+                    enabled: document.getElementById('agentEnabled').checked
+                };
+
+                const agentId = document.getElementById('agentId').value;
+                const isEdit = agentId !== '';
+
+                try {
+                    const url = isEdit ? `/api/agents/${agentId}` : '/api/agents';
+                    const method = isEdit ? 'PUT' : 'POST';
+                    
+                    const response = await fetch(url, {
+                        method: method,
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(formData)
+                    });
+
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        alert(isEdit ? '智能体更新成功' : '智能体创建成功');
+                        bootstrap.Modal.getInstance(document.getElementById('agentEditModal')).hide();
+                        await this.loadAgentsList();
+                        await this.loadAgents(); // Reload main agent list
+                    } else {
+                        alert('保存失败: ' + data.error);
+                    }
+                } catch (error) {
+                    console.error('Failed to save agent:', error);
+                    alert('保存失败: ' + error.message);
+                }
+            }
+
+            async saveTemplate() {
+                const formData = {
+                    name: document.getElementById('templateName').value,
+                    description: document.getElementById('templateDescription').value,
+                    enabled: document.getElementById('templateEnabled').checked,
+                    agents: Array.from(document.querySelectorAll('#templateAgentsSelection input:checked')).map(cb => cb.value)
+                };
+
+                const templateId = document.getElementById('templateId').value;
+                const isEdit = templateId !== '';
+
+                try {
+                    const url = isEdit ? `/api/templates/${templateId}` : '/api/templates';
+                    const method = isEdit ? 'PUT' : 'POST';
+                    
+                    const response = await fetch(url, {
+                        method: method,
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(formData)
+                    });
+
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        alert(isEdit ? '模板更新成功' : '模板创建成功');
+                        bootstrap.Modal.getInstance(document.getElementById('templateEditModal')).hide();
+                        await this.loadTemplatesList();
+                        await this.loadTemplates(); // Reload main template list
+                    } else {
+                        alert('保存失败: ' + data.error);
+                    }
+                } catch (error) {
+                    console.error('Failed to save template:', error);
+                    alert('保存失败: ' + error.message);
+                }
+            }
+
+            async deleteAgent(agentId) {
+                if (confirm('确定要删除这个智能体吗？')) {
+                    try {
+                        const response = await fetch(`/api/agents/${agentId}`, {
+                            method: 'DELETE'
+                        });
+
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            alert('智能体删除成功');
+                            await this.loadAgentsList();
+                            await this.loadAgents(); // Reload main agent list
+                        } else {
+                            alert('删除失败: ' + data.error);
+                        }
+                    } catch (error) {
+                        console.error('Failed to delete agent:', error);
+                        alert('删除失败: ' + error.message);
+                    }
+                }
+            }
+
+            async deleteTemplate(templateId) {
+                if (confirm('确定要删除这个模板吗？')) {
+                    try {
+                        const response = await fetch(`/api/templates/${templateId}`, {
+                            method: 'DELETE'
+                        });
+
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            alert('模板删除成功');
+                            await this.loadTemplatesList();
+                            await this.loadTemplates(); // Reload main template list
+                        } else {
+                            alert('删除失败: ' + data.error);
+                        }
+                    } catch (error) {
+                        console.error('Failed to delete template:', error);
+                        alert('删除失败: ' + error.message);
+                    }
+                }
+            }
+
+            editAgent(agentId) {
+                this.showAgentEditModal(agentId);
+            }
+
+            editTemplate(templateId) {
+                this.showTemplateEditModal(templateId);
+            }
+
+            // Agent Template Configuration Methods (Modal)
+            toggleModalAgentWebSearchConfig(enabled) {
+                const webSearchConfig = document.getElementById('modalAgentWebSearchConfig');
+                webSearchConfig.style.display = enabled ? 'block' : 'none';
+            }
+
+            async loadModalAgentTemplateConfig(agentId) {
+                try {
+                    const response = await fetch(`/api/agents/${agentId}/template-config`);
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.populateModalAgentTemplateConfig(data.config);
+                    }
+                } catch (error) {
+                    console.error('Failed to load agent template config:', error);
+                }
+            }
+
+            populateModalAgentTemplateConfig(config) {
+                document.getElementById('modalAgentDefaultModel').value = config.default_model || 'openai';
+                document.getElementById('modalAgentTemperature').value = config.temperature || 0.7;
+                document.getElementById('modalTemperatureValue').textContent = config.temperature || 0.7;
+                document.getElementById('modalAgentMaxTokens').value = config.max_tokens || 2000;
+                document.getElementById('modalAgentTimeout').value = config.timeout || 300;
+                document.getElementById('modalAgentDeepResearch').checked = config.deep_research_enabled || true;
+                document.getElementById('modalAgentWebSearch').checked = config.web_search_enabled || true;
+                document.getElementById('modalAgentSearchEngine').value = config.search_engine || 'duckduckgo';
+                document.getElementById('modalAgentSearchResults').value = config.search_results_count || 10;
+                document.getElementById('modalAgentIncludeImages').checked = config.include_images || false;
+                
+                this.toggleModalAgentWebSearchConfig(config.web_search_enabled || true);
+            }
+
+            async saveModalAgentTemplateConfig() {
+                const config = {
+                    default_model: document.getElementById('modalAgentDefaultModel').value,
+                    temperature: parseFloat(document.getElementById('modalAgentTemperature').value),
+                    max_tokens: parseInt(document.getElementById('modalAgentMaxTokens').value),
+                    timeout: parseInt(document.getElementById('modalAgentTimeout').value),
+                    deep_research_enabled: document.getElementById('modalAgentDeepResearch').checked,
+                    web_search_enabled: document.getElementById('modalAgentWebSearch').checked,
+                    search_engine: document.getElementById('modalAgentSearchEngine').value,
+                    search_results_count: parseInt(document.getElementById('modalAgentSearchResults').value),
+                    include_images: document.getElementById('modalAgentIncludeImages').checked
+                };
+
+                try {
+                    const response = await fetch(`/api/agents/${this.currentAgentId}/template-config`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(config)
+                    });
+
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        alert('智能体模板配置保存成功');
+                        // Close the modal
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('agentTemplateConfigModal'));
+                        if (modal) {
+                            modal.hide();
+                        }
+                    } else {
+                        alert('保存失败: ' + data.error);
+                    }
+                } catch (error) {
+                    console.error('Failed to save agent template config:', error);
+                    alert('保存失败: ' + error.message);
+                }
+            }
+
+            resetModalAgentTemplateConfig() {
+                if (confirm('确定要重置为默认配置吗？')) {
+                    this.populateModalAgentTemplateConfig({
+                        default_model: 'openai',
+                        temperature: 0.7,
+                        max_tokens: 2000,
+                        timeout: 300,
+                        deep_research_enabled: true,
+                        web_search_enabled: true,
+                        search_engine: 'duckduckgo',
+                        search_results_count: 10,
+                        include_images: false
+                    });
+                }
+            }
+
+            showAgentTemplateConfig(agentId) {
+                this.currentAgentId = agentId;
+                const agent = this.availableAgents.find(a => a.agent_id === agentId);
+                if (agent) {
+                    // Update modal title
+                    document.getElementById('agentTemplateConfigModalLabel').innerHTML = 
+                        `<i class="fas fa-cog me-2"></i>${agent.name} - 模板配置`;
+                    
+                    // Show the template configuration modal
+                    const modal = new bootstrap.Modal(document.getElementById('agentTemplateConfigModal'));
+                    modal.show();
+                    
+                    // Load template configuration
+                    this.loadModalAgentTemplateConfig(agentId);
+                }
+            }
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', () => {
+            window.researchAssistant = new ResearchAssistant();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,265 @@
+{
+  "agents": {
+    "research": {
+      "agent_id": "research",
+      "name": "研究助手",
+      "description": "通用研究分析智能体，擅长综合分析和多角度思考",
+      "icon": "search",
+      "color": "primary",
+      "prompt_template": "作为一个专业的研究助手，请分析以下查询并提供全面的研究结果：\n\n查询: {query}\n\n{context_info}{web_search_info}{deep_research_note}\n\n请提供：\n1. 查询的核心主题分析\n2. 相关的主要概念和术语\n3. 可能的研究方向\n4. 建议的进一步研究问题\n5. 关键发现和见解\n\n请用中文回答，结构清晰，内容详实，逻辑严密。",
+      "enabled": true,
+      "template_config": {
+        "default_model": "gemini",
+        "preferred_ollama_model": "deepseek-r1:latest",
+        "preferred_openai_model": "gpt-4o",
+        "preferred_gemini_model": "gemini-1.5-pro",
+        "deep_research_enabled": true,
+        "web_search_enabled": true,
+        "search_engine": "duckduckgo",
+        "search_results_count": 15,
+        "include_images": true,
+        "temperature": 0.8,
+        "max_tokens": 2500,
+        "timeout": 400
+      },
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2025-10-25T18:42:57.659647"
+    },
+    "technical": {
+      "agent_id": "technical",
+      "name": "技术专家",
+      "description": "技术问题分析和解决方案提供",
+      "icon": "code",
+      "color": "success",
+      "prompt_template": "作为一个技术专家，请分析以下技术查询并提供专业的解决方案：\n\n查询: {query}\n\n{context_info}{web_search_info}{deep_research_note}\n\n请提供：\n1. 技术问题分析\n2. 可能的解决方案\n3. 最佳实践建议\n4. 相关技术栈推荐\n5. 实施步骤和注意事项\n\n请用中文回答，提供具体的技术细节和可操作的指导。",
+      "enabled": true,
+      "template_config": {
+        "default_model": "openai",
+        "preferred_ollama_model": "deepseek-r1:latest",
+        "preferred_openai_model": "gpt-4o",
+        "preferred_gemini_model": "gemini-1.5-pro",
+        "deep_research_enabled": true,
+        "web_search_enabled": true,
+        "search_engine": "google",
+        "search_results_count": 10,
+        "include_images": false,
+        "temperature": 0.7,
+        "max_tokens": 2000,
+        "timeout": 300
+      },
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2025-10-25T18:43:47.204059"
+    },
+    "academic": {
+      "agent_id": "academic",
+      "name": "学术专家",
+      "description": "学术研究和论文写作指导",
+      "icon": "graduation-cap",
+      "color": "info",
+      "prompt_template": "作为一个学术专家，请分析以下学术查询并提供专业的学术指导：\n\n查询: {query}\n\n{context_info}{web_search_info}{deep_research_note}\n\n请提供：\n1. 学术问题分析\n2. 相关理论框架\n3. 研究方法建议\n4. 文献综述要点\n5. 论文结构建议\n6. 学术写作技巧\n\n请用中文回答，注重学术严谨性和理论深度。",
+      "enabled": true,
+      "template_config": {
+        "default_model": "openai",
+        "preferred_ollama_model": "deepseek-r1:latest",
+        "preferred_openai_model": "gpt-4o",
+        "preferred_gemini_model": "gemini-1.5-pro",
+        "deep_research_enabled": true,
+        "web_search_enabled": true,
+        "search_engine": "duckduckgo",
+        "search_results_count": 10,
+        "include_images": false,
+        "temperature": 0.7,
+        "max_tokens": 2000,
+        "timeout": 300
+      },
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2025-10-25T08:33:47.663326"
+    },
+    "business": {
+      "agent_id": "business",
+      "name": "商业分析师",
+      "description": "商业策略和市场分析",
+      "icon": "chart-line",
+      "color": "warning",
+      "prompt_template": "作为一个商业分析师，请分析以下商业查询并提供专业的商业洞察：\n\n查询: {query}\n\n{context_info}{web_search_info}{deep_research_note}\n\n请提供：\n1. 商业问题分析\n2. 市场机会评估\n3. 竞争分析\n4. 商业模式建议\n5. 风险评估\n6. 实施策略\n\n请用中文回答，注重商业可行性和市场洞察。",
+      "enabled": true,
+      "template_config": {
+        "default_model": "openai",
+        "preferred_ollama_model": "deepseek-r1:latest",
+        "preferred_openai_model": "gpt-4o",
+        "preferred_gemini_model": "gemini-1.5-pro",
+        "deep_research_enabled": true,
+        "web_search_enabled": true,
+        "search_engine": "google",
+        "search_results_count": 12,
+        "include_images": true,
+        "temperature": 0.6,
+        "max_tokens": 2500,
+        "timeout": 300
+      },
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    },
+    "creative": {
+      "agent_id": "creative",
+      "name": "创意专家",
+      "description": "创意构思和内容创作",
+      "icon": "lightbulb",
+      "color": "secondary",
+      "prompt_template": "作为一个创意专家，请分析以下创意查询并提供创新的解决方案：\n\n查询: {query}\n\n{context_info}{web_search_info}{deep_research_note}\n\n请提供：\n1. 创意问题分析\n2. 创新思路和想法\n3. 创意实施方案\n4. 内容创作建议\n5. 视觉和设计建议\n6. 创意评估标准\n\n请用中文回答，注重创新性和创意质量。",
+      "enabled": true,
+      "template_config": {
+        "default_model": "openai",
+        "preferred_ollama_model": "deepseek-r1:latest",
+        "preferred_openai_model": "gpt-4o",
+        "preferred_gemini_model": "gemini-1.5-pro",
+        "deep_research_enabled": true,
+        "web_search_enabled": true,
+        "search_engine": "duckduckgo",
+        "search_results_count": 8,
+        "include_images": true,
+        "temperature": 0.9,
+        "max_tokens": 2000,
+        "timeout": 300
+      },
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    },
+    "legal": {
+      "agent_id": "legal",
+      "name": "法律顾问",
+      "description": "法律问题分析和合规建议",
+      "icon": "balance-scale",
+      "color": "dark",
+      "prompt_template": "作为一个法律顾问，请分析以下法律查询并提供专业的法律建议：\n\n查询: {query}\n\n{context_info}{web_search_info}{deep_research_note}\n\n请提供：\n1. 法律问题分析\n2. 相关法律法规\n3. 法律风险评估\n4. 合规建议\n5. 解决方案建议\n6. 注意事项和免责声明\n\n请用中文回答，注重法律准确性和合规性。注意：此建议仅供参考，具体法律问题请咨询专业律师。",
+      "enabled": true,
+      "template_config": {
+        "default_model": "openai",
+        "preferred_ollama_model": "deepseek-r1:latest",
+        "preferred_openai_model": "gpt-4o",
+        "preferred_gemini_model": "gemini-1.5-pro",
+        "deep_research_enabled": true,
+        "web_search_enabled": true,
+        "search_engine": "google",
+        "search_results_count": 10,
+        "include_images": false,
+        "temperature": 0.2,
+        "max_tokens": 3000,
+        "timeout": 300
+      },
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    },
+    "9c1e3f81": {
+      "agent_id": "9c1e3f81",
+      "name": "网络查询",
+      "description": "不需要什么专业，把网络信息查询就可以",
+      "icon": "search",
+      "color": "info",
+      "prompt_template": "",
+      "enabled": true,
+      "template_config": {
+        "default_model": "openai",
+        "preferred_ollama_model": "deepseek-r1:latest",
+        "preferred_openai_model": "gpt-4o",
+        "preferred_gemini_model": "gemini-1.5-pro",
+        "deep_research_enabled": false,
+        "web_search_enabled": true,
+        "search_engine": "google",
+        "search_results_count": 30,
+        "include_images": false,
+        "temperature": 0.7,
+        "max_tokens": 10000,
+        "timeout": 300
+      },
+      "created_at": "2025-10-25T08:49:12.538743",
+      "updated_at": "2025-10-25T20:01:09.971665"
+    }
+  },
+  "templates": {
+    "default": {
+      "template_id": "default",
+      "name": "默认模板",
+      "description": "使用所有启用的智能体",
+      "agents": [
+        "research",
+        "technical",
+        "academic",
+        "business"
+      ],
+      "enabled": true,
+      "created_at": "2025-10-25T08:02:30.239090",
+      "updated_at": "2025-10-25T08:02:30.239090"
+    },
+    "technical_focus": {
+      "template_id": "technical_focus",
+      "name": "技术导向",
+      "description": "专注于技术问题分析",
+      "agents": [
+        "technical",
+        "research"
+      ],
+      "enabled": true,
+      "created_at": "2025-10-25T08:02:30.239092",
+      "updated_at": "2025-10-25T08:02:30.239093"
+    },
+    "academic_focus": {
+      "template_id": "academic_focus",
+      "name": "学术导向",
+      "description": "专注于学术研究和论文写作",
+      "agents": [
+        "academic",
+        "research"
+      ],
+      "enabled": true,
+      "created_at": "2025-10-25T08:02:30.239094",
+      "updated_at": "2025-10-25T08:02:30.239095"
+    },
+    "business_focus": {
+      "template_id": "business_focus",
+      "name": "商业导向",
+      "description": "专注于商业分析和策略",
+      "agents": [
+        "business",
+        "research"
+      ],
+      "enabled": true,
+      "created_at": "2025-10-25T08:02:30.239096",
+      "updated_at": "2025-10-25T08:02:30.239097"
+    },
+    "creative_focus": {
+      "template_id": "creative_focus",
+      "name": "创意导向",
+      "description": "专注于创意构思和内容创作",
+      "agents": [
+        "creative",
+        "research"
+      ],
+      "enabled": true,
+      "created_at": "2025-10-25T08:02:30.239098",
+      "updated_at": "2025-10-25T08:02:30.239098"
+    },
+    "comprehensive": {
+      "template_id": "comprehensive",
+      "name": "全面分析",
+      "description": "使用所有可用智能体进行全面分析",
+      "agents": [
+        "research",
+        "technical",
+        "academic",
+        "business",
+        "creative",
+        "legal"
+      ],
+      "enabled": true,
+      "created_at": "2025-10-25T08:02:30.239099",
+      "updated_at": "2025-10-25T08:02:30.239100"
+    }
+  },
+  "metadata": {
+    "version": "1.0.0",
+    "last_updated": "2025-10-25T20:01:09.971781",
+    "total_agents": 7,
+    "total_templates": 6
+  }
+}
