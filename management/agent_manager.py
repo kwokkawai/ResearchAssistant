@@ -62,7 +62,7 @@ class AgentDefinition:
             'color': self.color,
             'prompt_template': self.prompt_template,
             'enabled': self.enabled,
-            'template_config': self.template_config,
+            'template_id': self.template_id,
             'created_at': self.created_at,
             'updated_at': self.updated_at
         }
