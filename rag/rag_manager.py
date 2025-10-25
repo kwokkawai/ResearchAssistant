@@ -102,7 +102,7 @@ class RAGManager:
                 'document_id': None
             }
 
-    def add_documents_from_directory(self, directory_path: str) -> Dict[str, Any]:
+    def add_documents_from_directory(self, directory_path: str, force_reload: bool = False) -> Dict[str, Any]:
         """Add all documents from a directory"""
         try:
             documents = self.document_processor.load_documents_from_directory(directory_path)
@@ -116,8 +116,17 @@ class RAGManager:
                     'failed': 0
                 }
 
-            # Filter out already loaded documents
-            new_documents = [doc for doc in documents if doc['id'] not in self.loaded_documents]
+            # Filter out already loaded documents (unless force_reload is True)
+            if force_reload:
+                new_documents = documents
+                # Remove existing documents from tracking
+                for doc in documents:
+                    if doc['id'] in self.loaded_documents:
+                        self.loaded_documents.remove(doc['id'])
+                        # Also remove from vector store
+                        self.vector_store.remove_document(doc['id'])
+            else:
+                new_documents = [doc for doc in documents if doc['id'] not in self.loaded_documents]
 
             if not new_documents:
                 return {

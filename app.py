@@ -745,5 +745,28 @@ def generate_rag_response():
     except Exception as e:
         return jsonify({'error': f'Failed to generate RAG response: {str(e)}'}), 500
 
+@app.route('/api/rag/documents', methods=['DELETE'])
+def clear_all_documents():
+    """Clear all documents from RAG system"""
+    try:
+        if not rag_manager:
+            return jsonify({'error': 'RAG manager not available'}), 503
+
+        success = rag_manager.clear_all_documents()
+
+        if success:
+            return jsonify({
+                'success': True,
+                'message': 'All documents cleared successfully'
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Failed to clear documents'
+            }), 500
+
+    except Exception as e:
+        return jsonify({'error': f'Failed to clear documents: {str(e)}'}), 500
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5050)

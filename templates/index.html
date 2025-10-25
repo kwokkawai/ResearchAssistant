@@ -729,10 +729,21 @@
                                             </small>
                                         </div>
                                         <div class="mt-3">
-                                            <button type="button" class="btn btn-outline-primary btn-sm" id="testRAGDocumentsBtn">
-                                                <i class="fas fa-search me-2"></i>测试文档加载
-                                            </button>
-                                            <span id="ragTestResult" class="ms-2 text-muted"></span>
+                                            <div class="form-check mb-2">
+                                                <input class="form-check-input" type="checkbox" id="forceReloadRAG">
+                                                <label class="form-check-label" for="forceReloadRAG">
+                                                    强制重新加载（清除现有文档后重新加载）
+                                                </label>
+                                            </div>
+                                            <div class="d-flex gap-2">
+                                                <button type="button" class="btn btn-outline-primary btn-sm" id="testRAGDocumentsBtn">
+                                                    <i class="fas fa-search me-2"></i>测试文档加载
+                                                </button>
+                                                <button type="button" class="btn btn-outline-warning btn-sm" id="clearRAGDocumentsBtn">
+                                                    <i class="fas fa-trash me-2"></i>清除所有文档
+                                                </button>
+                                            </div>
+                                            <span id="ragTestResult" class="ms-2 text-muted d-block mt-2"></span>
                                         </div>
                                     </div>
                                 </div>
@@ -1302,6 +1313,10 @@
 
                 document.getElementById('testRAGDocumentsBtn').addEventListener('click', () => {
                     this.testRAGDocuments();
+                });
+
+                document.getElementById('clearRAGDocumentsBtn').addEventListener('click', () => {
+                    this.clearRAGDocuments();
                 });
             }
 
@@ -2213,7 +2228,8 @@
                     return;
                 }
 
-                document.getElementById('ragTestResult').textContent = '正在测试文档加载...';
+                const forceReload = document.getElementById('forceReloadRAG').checked;
+                document.getElementById('ragTestResult').textContent = forceReload ? '正在强制重新加载文档...' : '正在测试文档加载...';
                 document.getElementById('ragTestResult').className = 'text-info';
                 document.getElementById('testRAGDocumentsBtn').disabled = true;
 
@@ -2233,7 +2249,10 @@
                                     headers: {
                                         'Content-Type': 'application/json',
                                     },
-                                    body: JSON.stringify({ file_path: link.trim() })
+                                    body: JSON.stringify({
+                                        file_path: link.trim(),
+                                        force_reload: forceReload
+                                    })
                                 });
 
                                 const result = await response.json();
@@ -2282,6 +2301,40 @@
                     document.getElementById('ragTestResult').className = 'text-danger';
                 } finally {
                     document.getElementById('testRAGDocumentsBtn').disabled = false;
+                }
+            }
+
+            async clearRAGDocuments() {
+                if (!confirm('确定要清除所有已加载的RAG文档吗？此操作不可撤销。')) {
+                    return;
+                }
+
+                document.getElementById('ragTestResult').textContent = '正在清除文档...';
+                document.getElementById('ragTestResult').className = 'text-info';
+                document.getElementById('clearRAGDocumentsBtn').disabled = true;
+
+                try {
+                    const response = await fetch('/api/rag/documents', {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        document.getElementById('ragTestResult').textContent = '文档清除成功！现在可以重新加载文档了。';
+                        document.getElementById('ragTestResult').className = 'text-success';
+                    } else {
+                        document.getElementById('ragTestResult').textContent = `清除失败: ${result.error}`;
+                        document.getElementById('ragTestResult').className = 'text-danger';
+                    }
+                } catch (error) {
+                    document.getElementById('ragTestResult').textContent = `清除出错：${error.message}`;
+                    document.getElementById('ragTestResult').className = 'text-danger';
+                } finally {
+                    document.getElementById('clearRAGDocumentsBtn').disabled = false;
                 }
             }
 
