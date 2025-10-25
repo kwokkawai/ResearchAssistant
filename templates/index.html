@@ -2238,6 +2238,7 @@
                     let totalCount = 0;
 
                     let errorDetails = [];
+                    let alreadyExistsDetails = []; // 已存在的文档信息
                     let totalProcessed = 0; // 实际处理的文档数量
 
                     for (const link of documentLinks) {
@@ -2268,8 +2269,18 @@
                                         successCount++;
                                     }
                                 } else {
-                                    errorDetails.push(`${link.trim()}: ${result.error}${result.details ? ' (' + result.details + ')' : ''}`);
-                                    console.error(`Failed to load: ${link.trim()}`, result);
+                                    // 特殊处理"All documents in directory are already loaded"情况
+                                    if (result.error && result.error.includes('All documents in directory are already loaded')) {
+                                        // 这不是真正的错误，而是一个状态信息
+                                        alreadyExistsDetails.push(`${link.trim()}: 文档已存在`);
+                                        // 如果没有强制重新加载，算作成功（因为文档确实存在）
+                                        if (!forceReload) {
+                                            successCount += result.total || 0;
+                                        }
+                                    } else {
+                                        errorDetails.push(`${link.trim()}: ${result.error}${result.details ? ' (' + result.details + ')' : ''}`);
+                                        console.error(`Failed to load: ${link.trim()}`, result);
+                                    }
                                 }
                             } catch (error) {
                                 errorDetails.push(`${link.trim()}: Network error - ${error.message}`);
@@ -2278,22 +2289,42 @@
                         }
                     }
 
+                    // 构建结果消息
+                    let resultMessage = '';
+                    let resultClass = 'text-success';
+
                     if (successCount > 0) {
-                        if (errorDetails.length === 0) {
-                            document.getElementById('ragTestResult').textContent = `测试成功：共加载 ${successCount} 个文档`;
-                            document.getElementById('ragTestResult').className = 'text-success';
-                        } else {
-                            document.getElementById('ragTestResult').textContent = `部分成功：共加载 ${successCount} 个文档，${errorDetails.length} 个路径有问题`;
-                            document.getElementById('ragTestResult').className = 'text-warning';
+                        resultMessage = `成功：共 ${successCount} 个文档可用`;
+
+                        if (alreadyExistsDetails.length > 0) {
+                            resultMessage += `（${alreadyExistsDetails.length} 个已存在）`;
                         }
+
+                        if (errorDetails.length > 0) {
+                            resultMessage += `，${errorDetails.length} 个路径有问题`;
+                            resultClass = 'text-warning';
+                        }
+                    } else if (alreadyExistsDetails.length > 0) {
+                        resultMessage = `文档已存在：${alreadyExistsDetails.length} 个路径的文档都已加载。如需更新文档内容，请勾选上方的"强制重新加载"选项后重试`;
+                        resultClass = 'text-info';
                     } else {
-                        document.getElementById('ragTestResult').textContent = `测试失败：未能加载任何文档`;
-                        document.getElementById('ragTestResult').className = 'text-danger';
+                        resultMessage = `失败：未能加载任何文档`;
+                        resultClass = 'text-danger';
                         if (errorDetails.length > 0) {
                             console.error('文档加载失败详情:', errorDetails);
-                            // 显示第一个错误详情
-                            document.getElementById('ragTestResult').textContent += `\n错误详情: ${errorDetails[0]}`;
+                            resultMessage += `\n错误详情: ${errorDetails[0]}`;
                         }
+                    }
+
+                    document.getElementById('ragTestResult').textContent = resultMessage;
+                    document.getElementById('ragTestResult').className = resultClass;
+
+                    // 在控制台显示详细信息
+                    if (alreadyExistsDetails.length > 0) {
+                        console.info('已存在的文档:', alreadyExistsDetails);
+                    }
+                    if (errorDetails.length > 0) {
+                        console.warn('加载错误详情:', errorDetails);
                     }
 
                 } catch (error) {
