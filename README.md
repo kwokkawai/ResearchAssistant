@@ -235,6 +235,11 @@ gunicorn -w 4 -b 0.0.0.0:5050 app:app
 - `.json` - JSON文件
 - `.html`/`.htm` - HTML文件
 
+#### 文档管理功能：
+- **强制重新加载**: 勾选"强制重新加载"选项可以清除现有文档并重新加载
+- **清除所有文档**: 使用"清除所有文档"按钮可以重置整个RAG系统
+- **重复文档检测**: 系统自动防止加载重复的文档，提高效率
+
 #### 故障排除：
 如果遇到文档加载问题，请参考 [`docs/rag_troubleshooting.md`](docs/rag_troubleshooting.md)
 
@@ -317,7 +322,8 @@ POST /api/rag/documents
 Content-Type: application/json
 
 {
-    "file_path": "/path/to/document.pdf"
+    "file_path": "/path/to/document.pdf",
+    "force_reload": false
 }
 
 # 文件上传
@@ -326,6 +332,9 @@ Content-Type: multipart/form-data
 
 # 删除文档
 DELETE /api/rag/documents/{document_id}
+
+# 清除所有文档
+DELETE /api/rag/documents
 
 # 获取文档详情
 GET /api/rag/documents/{document_id}
