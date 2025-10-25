@@ -2222,6 +2222,7 @@
                     let totalCount = 0;
 
                     let errorDetails = [];
+                    let totalProcessed = 0; // 实际处理的文档数量
 
                     for (const link of documentLinks) {
                         if (link.trim()) {
@@ -2237,10 +2238,19 @@
 
                                 const result = await response.json();
                                 if (result.success) {
-                                    successCount++;
+                                    // 处理目录加载的结果（包含successful计数）
+                                    if (result.successful !== undefined) {
+                                        successCount += result.successful;
+                                        if (result.failed > 0) {
+                                            errorDetails.push(`${link.trim()}: ${result.failed} 个文档加载失败`);
+                                        }
+                                    } else {
+                                        // 处理单个文件加载的结果
+                                        successCount++;
+                                    }
                                 } else {
                                     errorDetails.push(`${link.trim()}: ${result.error}${result.details ? ' (' + result.details + ')' : ''}`);
-                                    console.error(`Failed to load document: ${link.trim()}`, result);
+                                    console.error(`Failed to load: ${link.trim()}`, result);
                                 }
                             } catch (error) {
                                 errorDetails.push(`${link.trim()}: Network error - ${error.message}`);
@@ -2249,17 +2259,16 @@
                         }
                     }
 
-                    if (successCount === totalCount) {
-                        document.getElementById('ragTestResult').textContent = `测试成功：${successCount}/${totalCount} 个文档加载成功`;
-                        document.getElementById('ragTestResult').className = 'text-success';
-                    } else if (successCount > 0) {
-                        document.getElementById('ragTestResult').textContent = `部分成功：${successCount}/${totalCount} 个文档加载成功`;
-                        document.getElementById('ragTestResult').className = 'text-warning';
-                        if (errorDetails.length > 0) {
-                            console.warn('部分文档加载失败详情:', errorDetails);
+                    if (successCount > 0) {
+                        if (errorDetails.length === 0) {
+                            document.getElementById('ragTestResult').textContent = `测试成功：共加载 ${successCount} 个文档`;
+                            document.getElementById('ragTestResult').className = 'text-success';
+                        } else {
+                            document.getElementById('ragTestResult').textContent = `部分成功：共加载 ${successCount} 个文档，${errorDetails.length} 个路径有问题`;
+                            document.getElementById('ragTestResult').className = 'text-warning';
                         }
                     } else {
-                        document.getElementById('ragTestResult').textContent = `测试失败：0/${totalCount} 个文档加载成功`;
+                        document.getElementById('ragTestResult').textContent = `测试失败：未能加载任何文档`;
                         document.getElementById('ragTestResult').className = 'text-danger';
                         if (errorDetails.length > 0) {
                             console.error('文档加载失败详情:', errorDetails);

@@ -540,7 +540,7 @@ def get_documents():
 
 @app.route('/api/rag/documents', methods=['POST'])
 def add_document():
-    """Add a new document to RAG system"""
+    """Add a new document or directory to RAG system"""
     try:
         if not rag_manager:
             return jsonify({'error': 'RAG manager not available'}), 503
@@ -552,15 +552,40 @@ def add_document():
             return jsonify({'error': 'No file path provided', 'details': 'Please provide a valid file path'}), 400
 
         # 记录请求信息用于调试
-        print(f"RAG API: Attempting to add document from path: '{file_path}'")
+        print(f"RAG API: Attempting to add from path: '{file_path}'")
 
-        result = rag_manager.add_document(file_path)
+        # 检查路径是文件还是目录
+        from pathlib import Path
+        path_obj = Path(file_path)
+
+        if not path_obj.exists():
+            return jsonify({
+                'error': f'Path does not exist: {file_path}',
+                'details': 'Please check that the file/directory exists and the path is correct'
+            }), 404
+
+        if path_obj.is_file():
+            # 处理单个文件
+            print(f"RAG API: Detected file, using single document loading")
+            result = rag_manager.add_document(file_path)
+        elif path_obj.is_dir():
+            # 处理目录
+            print(f"RAG API: Detected directory, using directory loading")
+            result = rag_manager.add_documents_from_directory(file_path)
+        else:
+            return jsonify({
+                'error': f'Invalid path type: {file_path}',
+                'details': 'Path must be either a file or a directory'
+            }), 400
 
         if result['success']:
-            print(f"RAG API: Successfully added document: {result.get('filename', 'unknown')}")
+            if path_obj.is_file():
+                print(f"RAG API: Successfully added document: {result.get('filename', 'unknown')}")
+            else:
+                print(f"RAG API: Successfully added {result.get('successful', 0)} documents from directory")
             return jsonify(result), 201
         else:
-            print(f"RAG API: Failed to add document '{file_path}': {result.get('error', 'Unknown error')}")
+            print(f"RAG API: Failed to add from '{file_path}': {result.get('error', 'Unknown error')}")
             return jsonify(result), 400
 
     except FileNotFoundError as e:
@@ -577,15 +602,8 @@ def add_document():
             'error': error_msg,
             'details': 'Please check file/directory permissions'
         }), 403
-    except IsADirectoryError as e:
-        error_msg = f'Expected file but found directory: {str(e)}'
-        print(f"RAG API Error: {error_msg}")
-        return jsonify({
-            'error': error_msg,
-            'details': 'For directories, use the directory loading endpoint or check your path'
-        }), 400
     except Exception as e:
-        error_msg = f'Failed to add document: {str(e)}'
+        error_msg = f'Failed to add document/directory: {str(e)}'
         print(f"RAG API Error: {error_msg}")
         return jsonify({
             'error': error_msg,
