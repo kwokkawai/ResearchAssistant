@@ -41,7 +41,12 @@ class AgentDefinition:
             "include_images": False,
             "temperature": 0.7,
             "max_tokens": 2000,
-            "timeout": 300
+            "timeout": 300,
+            # RAG configuration
+            "rag_enabled": False,
+            "document_links": [],  # List of document paths or directories
+            "rag_top_k": 5,
+            "rag_context_window": 2
         }
     
     def to_dict(self) -> Dict[str, Any]:
@@ -314,8 +319,16 @@ class AgentManager:
         deep_research_note = ""
         if context and context.get('deep_research_enabled'):
             deep_research_note = """
-            
+
             注意：请进行深度研究分析，提供多角度的见解和综合性的结论。
+            """
+
+        # Build RAG note (if RAG is enabled, this should not appear)
+        rag_note = ""
+        if context and context.get('rag_enabled'):
+            rag_note = """
+
+            注意：这是一个基于本地文档的RAG查询，请确保回答完全基于提供的文档内容，不要进行推测或外部知识补充。
             """
         
         # Format the prompt
@@ -323,7 +336,8 @@ class AgentManager:
             query=query,
             context_info=context_info,
             web_search_info=web_search_info,
-            deep_research_note=deep_research_note
+            deep_research_note=deep_research_note,
+            rag_note=rag_note
         )
     
     def validate_agent_ids(self, agent_ids: List[str]) -> List[str]:

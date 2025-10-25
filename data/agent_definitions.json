@@ -6,7 +6,7 @@
       "description": "通用研究分析智能体，擅长综合分析和多角度思考",
       "icon": "search",
       "color": "primary",
-      "prompt_template": "作为一个专业的研究助手，请分析以下查询并提供全面的研究结果：\n\n查询: {query}\n\n{context_info}{web_search_info}{deep_research_note}\n\n请提供：\n1. 查询的核心主题分析\n2. 相关的主要概念和术语\n3. 可能的研究方向\n4. 建议的进一步研究问题\n5. 关键发现和见解\n\n请用中文回答，结构清晰，内容详实，逻辑严密。",
+      "prompt_template": "作为一个专业的研究助手，请分析以下查询并提供全面的研究结果：\n\n查询: {query}\n\n{context_info}{web_search_info}{deep_research_note}{rag_note}\n\n请提供：\n1. 查询的核心主题分析\n2. 相关的主要概念和术语\n3. 可能的研究方向\n4. 建议的进一步研究问题\n5. 关键发现和见解\n\n请用中文回答，结构清晰，内容详实，逻辑严密。",
       "enabled": true,
       "template_config": {
         "default_model": "gemini",
@@ -31,7 +31,7 @@
       "description": "技术问题分析和解决方案提供",
       "icon": "code",
       "color": "success",
-      "prompt_template": "作为一个技术专家，请分析以下技术查询并提供专业的解决方案：\n\n查询: {query}\n\n{context_info}{web_search_info}{deep_research_note}\n\n请提供：\n1. 技术问题分析\n2. 可能的解决方案\n3. 最佳实践建议\n4. 相关技术栈推荐\n5. 实施步骤和注意事项\n\n请用中文回答，提供具体的技术细节和可操作的指导。",
+      "prompt_template": "作为一个技术专家，请分析以下技术查询并提供专业的解决方案：\n\n查询: {query}\n\n{context_info}{web_search_info}{deep_research_note}{rag_note}\n\n请提供：\n1. 技术问题分析\n2. 可能的解决方案\n3. 最佳实践建议\n4. 相关技术栈推荐\n5. 实施步骤和注意事项\n\n请用中文回答，提供具体的技术细节和可操作的指导。",
       "enabled": true,
       "template_config": {
         "default_model": "openai",
@@ -56,7 +56,7 @@
       "description": "学术研究和论文写作指导",
       "icon": "graduation-cap",
       "color": "info",
-      "prompt_template": "作为一个学术专家，请分析以下学术查询并提供专业的学术指导：\n\n查询: {query}\n\n{context_info}{web_search_info}{deep_research_note}\n\n请提供：\n1. 学术问题分析\n2. 相关理论框架\n3. 研究方法建议\n4. 文献综述要点\n5. 论文结构建议\n6. 学术写作技巧\n\n请用中文回答，注重学术严谨性和理论深度。",
+      "prompt_template": "作为一个学术专家，请分析以下学术查询并提供专业的学术指导：\n\n查询: {query}\n\n{context_info}{web_search_info}{deep_research_note}{rag_note}\n\n请提供：\n1. 学术问题分析\n2. 相关理论框架\n3. 研究方法建议\n4. 文献综述要点\n5. 论文结构建议\n6. 学术写作技巧\n\n请用中文回答，注重学术严谨性和理论深度。",
       "enabled": true,
       "template_config": {
         "default_model": "openai",
@@ -81,7 +81,7 @@
       "description": "商业策略和市场分析",
       "icon": "chart-line",
       "color": "warning",
-      "prompt_template": "作为一个商业分析师，请分析以下商业查询并提供专业的商业洞察：\n\n查询: {query}\n\n{context_info}{web_search_info}{deep_research_note}\n\n请提供：\n1. 商业问题分析\n2. 市场机会评估\n3. 竞争分析\n4. 商业模式建议\n5. 风险评估\n6. 实施策略\n\n请用中文回答，注重商业可行性和市场洞察。",
+      "prompt_template": "作为一个商业分析师，请分析以下商业查询并提供专业的商业洞察：\n\n查询: {query}\n\n{context_info}{web_search_info}{deep_research_note}{rag_note}\n\n请提供：\n1. 商业问题分析\n2. 市场机会评估\n3. 竞争分析\n4. 商业模式建议\n5. 风险评估\n6. 实施策略\n\n请用中文回答，注重商业可行性和市场洞察。",
       "enabled": true,
       "template_config": {
         "default_model": "openai",
@@ -106,7 +106,7 @@
       "description": "创意构思和内容创作",
       "icon": "lightbulb",
       "color": "secondary",
-      "prompt_template": "作为一个创意专家，请分析以下创意查询并提供创新的解决方案：\n\n查询: {query}\n\n{context_info}{web_search_info}{deep_research_note}\n\n请提供：\n1. 创意问题分析\n2. 创新思路和想法\n3. 创意实施方案\n4. 内容创作建议\n5. 视觉和设计建议\n6. 创意评估标准\n\n请用中文回答，注重创新性和创意质量。",
+      "prompt_template": "作为一个创意专家，请分析以下创意查询并提供创新的解决方案：\n\n查询: {query}\n\n{context_info}{web_search_info}{deep_research_note}{rag_note}\n\n请提供：\n1. 创意问题分析\n2. 创新思路和想法\n3. 创意实施方案\n4. 内容创作建议\n5. 视觉和设计建议\n6. 创意评估标准\n\n请用中文回答，注重创新性和创意质量。",
       "enabled": true,
       "template_config": {
         "default_model": "openai",
@@ -131,7 +131,7 @@
       "description": "法律问题分析和合规建议",
       "icon": "balance-scale",
       "color": "dark",
-      "prompt_template": "作为一个法律顾问，请分析以下法律查询并提供专业的法律建议：\n\n查询: {query}\n\n{context_info}{web_search_info}{deep_research_note}\n\n请提供：\n1. 法律问题分析\n2. 相关法律法规\n3. 法律风险评估\n4. 合规建议\n5. 解决方案建议\n6. 注意事项和免责声明\n\n请用中文回答，注重法律准确性和合规性。注意：此建议仅供参考，具体法律问题请咨询专业律师。",
+      "prompt_template": "作为一个法律顾问，请分析以下法律查询并提供专业的法律建议：\n\n查询: {query}\n\n{context_info}{web_search_info}{deep_research_note}{rag_note}\n\n请提供：\n1. 法律问题分析\n2. 相关法律法规\n3. 法律风险评估\n4. 合规建议\n5. 解决方案建议\n6. 注意事项和免责声明\n\n请用中文回答，注重法律准确性和合规性。注意：此建议仅供参考，具体法律问题请咨询专业律师。",
       "enabled": true,
       "template_config": {
         "default_model": "openai",
@@ -156,7 +156,7 @@
       "description": "不需要什么专业，把网络信息查询就可以",
       "icon": "search",
       "color": "info",
-      "prompt_template": "",
+      "prompt_template": "作为一个网络信息查询助手，请根据用户查询提供网络搜索结果：\n\n查询: {query}\n\n{context_info}{web_search_info}{deep_research_note}{rag_note}\n\n请基于网络搜索结果直接回答用户的问题，提供准确、及时的信息。",
       "enabled": true,
       "template_config": {
         "default_model": "openai",

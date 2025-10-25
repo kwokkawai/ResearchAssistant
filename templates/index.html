@@ -634,7 +634,7 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="modalAgentDeepResearch" checked>
                                     <label class="form-check-label" for="modalAgentDeepResearch">
@@ -642,11 +642,19 @@
                                     </label>
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="modalAgentWebSearch" checked>
                                     <label class="form-check-label" for="modalAgentWebSearch">
                                         启用网络搜索
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="modalAgentRAG">
+                                    <label class="form-check-label" for="modalAgentRAG">
+                                        启用本地文档RAG
                                     </label>
                                 </div>
                             </div>
@@ -681,6 +689,50 @@
                                                     </label>
                                                 </div>
                                             </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3" id="modalAgentRAGConfig" style="display: none;">
+                            <div class="col-12">
+                                <div class="card border-info">
+                                    <div class="card-header bg-info text-white">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-file-alt me-2"></i>本地文档RAG配置
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="alert alert-warning">
+                                            <i class="fas fa-exclamation-triangle me-2"></i>
+                                            <strong>注意：</strong>启用RAG功能后，智能体将只能基于配置的本地文档回答问题，不会使用网络搜索。
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <label for="modalAgentRAGTopK" class="form-label">检索文档数量</label>
+                                                <input type="number" class="form-control" id="modalAgentRAGTopK" min="1" max="10" value="5">
+                                                <small class="form-text text-muted">每次查询检索的相关文档片段数量</small>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="modalAgentRAGContextWindow" class="form-label">上下文窗口</label>
+                                                <input type="number" class="form-control" id="modalAgentRAGContextWindow" min="1" max="5" value="2">
+                                                <small class="form-text text-muted">包含前后相关段落的数量</small>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3">
+                                            <label class="form-label">文档链接</label>
+                                            <textarea class="form-control" id="modalAgentDocumentLinks" rows="4"
+                                                placeholder="输入文档路径，每行一个：&#10;/path/to/document.pdf&#10;/path/to/folder/&#10;C:\path\to\document.docx"></textarea>
+                                            <small class="form-text text-muted">
+                                                支持的文件格式：PDF (.pdf), Word (.docx, .doc), Markdown (.md), 文本 (.txt), JSON (.json), HTML (.html)<br>
+                                                可以输入文件路径或文件夹路径（会自动加载文件夹中的所有支持文件）
+                                            </small>
+                                        </div>
+                                        <div class="mt-3">
+                                            <button type="button" class="btn btn-outline-primary btn-sm" id="testRAGDocumentsBtn">
+                                                <i class="fas fa-search me-2"></i>测试文档加载
+                                            </button>
+                                            <span id="ragTestResult" class="ms-2 text-muted"></span>
                                         </div>
                                     </div>
                                 </div>
@@ -1219,6 +1271,23 @@
                     this.toggleModalAgentWebSearchConfig(e.target.checked);
                 });
 
+                document.getElementById('modalAgentRAG').addEventListener('change', (e) => {
+                    this.toggleModalAgentRAGConfig(e.target.checked);
+                    // 如果启用RAG，自动禁用网络搜索
+                    if (e.target.checked) {
+                        document.getElementById('modalAgentWebSearch').checked = false;
+                        this.toggleModalAgentWebSearchConfig(false);
+                    }
+                });
+
+                // 网络搜索启用时自动禁用RAG
+                document.getElementById('modalAgentWebSearch').addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        document.getElementById('modalAgentRAG').checked = false;
+                        this.toggleModalAgentRAGConfig(false);
+                    }
+                });
+
                 document.getElementById('modalAgentTemperature').addEventListener('input', (e) => {
                     document.getElementById('modalTemperatureValue').textContent = e.target.value;
                 });
@@ -1229,6 +1298,10 @@
 
                 document.getElementById('resetModalAgentTemplateConfig').addEventListener('click', () => {
                     this.resetModalAgentTemplateConfig();
+                });
+
+                document.getElementById('testRAGDocumentsBtn').addEventListener('click', () => {
+                    this.testRAGDocuments();
                 });
             }
 
@@ -2124,6 +2197,71 @@
                 webSearchConfig.style.display = enabled ? 'block' : 'none';
             }
 
+            toggleModalAgentRAGConfig(enabled) {
+                const ragConfig = document.getElementById('modalAgentRAGConfig');
+                ragConfig.style.display = enabled ? 'block' : 'none';
+            }
+
+            async testRAGDocuments() {
+                const documentLinks = document.getElementById('modalAgentDocumentLinks').value
+                    .split('\n')
+                    .filter(link => link.trim() !== '');
+
+                if (documentLinks.length === 0) {
+                    document.getElementById('ragTestResult').textContent = '请先输入文档路径';
+                    document.getElementById('ragTestResult').className = 'text-warning';
+                    return;
+                }
+
+                document.getElementById('ragTestResult').textContent = '正在测试文档加载...';
+                document.getElementById('ragTestResult').className = 'text-info';
+                document.getElementById('testRAGDocumentsBtn').disabled = true;
+
+                try {
+                    let successCount = 0;
+                    let totalCount = 0;
+
+                    for (const link of documentLinks) {
+                        if (link.trim()) {
+                            totalCount++;
+                            try {
+                                const response = await fetch('/api/rag/documents', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({ file_path: link.trim() })
+                                });
+
+                                const result = await response.json();
+                                if (result.success) {
+                                    successCount++;
+                                }
+                            } catch (error) {
+                                console.error(`Failed to test document: ${link}`, error);
+                            }
+                        }
+                    }
+
+                    if (successCount === totalCount) {
+                        document.getElementById('ragTestResult').textContent = `测试成功：${successCount}/${totalCount} 个文档加载成功`;
+                        document.getElementById('ragTestResult').className = 'text-success';
+                    } else if (successCount > 0) {
+                        document.getElementById('ragTestResult').textContent = `部分成功：${successCount}/${totalCount} 个文档加载成功`;
+                        document.getElementById('ragTestResult').className = 'text-warning';
+                    } else {
+                        document.getElementById('ragTestResult').textContent = `测试失败：0/${totalCount} 个文档加载成功`;
+                        document.getElementById('ragTestResult').className = 'text-danger';
+                    }
+
+                } catch (error) {
+                    document.getElementById('ragTestResult').textContent = `测试出错：${error.message}`;
+                    document.getElementById('ragTestResult').className = 'text-danger';
+                } finally {
+                    document.getElementById('testRAGDocumentsBtn').disabled = false;
+                }
+            }
+
             async loadModalAgentTemplateConfig(agentId) {
                 try {
                     const response = await fetch(`/api/agents/${agentId}/template-config`);
@@ -2148,8 +2286,15 @@
                 document.getElementById('modalAgentSearchEngine').value = config.search_engine || 'duckduckgo';
                 document.getElementById('modalAgentSearchResults').value = config.search_results_count || 10;
                 document.getElementById('modalAgentIncludeImages').checked = config.include_images || false;
-                
+
+                // RAG configuration
+                document.getElementById('modalAgentRAG').checked = config.rag_enabled || false;
+                document.getElementById('modalAgentRAGTopK').value = config.rag_top_k || 5;
+                document.getElementById('modalAgentRAGContextWindow').value = config.rag_context_window || 2;
+                document.getElementById('modalAgentDocumentLinks').value = (config.document_links || []).join('\n');
+
                 this.toggleModalAgentWebSearchConfig(config.web_search_enabled || true);
+                this.toggleModalAgentRAGConfig(config.rag_enabled || false);
             }
 
             async saveModalAgentTemplateConfig() {
@@ -2162,7 +2307,12 @@
                     web_search_enabled: document.getElementById('modalAgentWebSearch').checked,
                     search_engine: document.getElementById('modalAgentSearchEngine').value,
                     search_results_count: parseInt(document.getElementById('modalAgentSearchResults').value),
-                    include_images: document.getElementById('modalAgentIncludeImages').checked
+                    include_images: document.getElementById('modalAgentIncludeImages').checked,
+                    // RAG configuration
+                    rag_enabled: document.getElementById('modalAgentRAG').checked,
+                    rag_top_k: parseInt(document.getElementById('modalAgentRAGTopK').value),
+                    rag_context_window: parseInt(document.getElementById('modalAgentRAGContextWindow').value),
+                    document_links: document.getElementById('modalAgentDocumentLinks').value.split('\n').filter(link => link.trim() !== '')
                 };
 
                 try {

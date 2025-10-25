@@ -295,13 +295,27 @@ class DynamicAgent(Agent):
     def process_query(self, query: str, context: Dict[str, Any] = None) -> Dict[str, Any]:
         """Process query using dynamic prompt template"""
         try:
+            # Check if RAG is enabled - if so, use RAG results directly
+            if context and context.get('rag_enabled') and context.get('rag_results'):
+                rag_results = context['rag_results']
+                # For RAG-enabled agents, return the RAG response directly
+                return {
+                    'agent': self.name,
+                    'query': query,
+                    'response': rag_results.get('response', 'RAG回答不可用'),
+                    'timestamp': datetime.now().isoformat(),
+                    'agent_id': self.agent_definition.agent_id,
+                    'rag_sources': rag_results.get('sources', []),
+                    'based_on_documents': True
+                }
+
             # Get formatted prompt from dynamic agent manager
             prompt = dynamic_agent_manager.get_agent_prompt(
-                self.agent_definition.agent_id, 
-                query, 
+                self.agent_definition.agent_id,
+                query,
                 context
             )
-            
+
             response = self.generate_response(prompt)
             return {
                 'agent': self.name,
@@ -427,7 +441,7 @@ class AgentManager:
 
         return default_options
 
-    def execute_research(self, query: str, selected_agents: List[str] = None, preferred_model: str = 'openai', context: str = '', deep_research_options: Dict[str, Any] = None) -> Dict[str, Any]:
+    def execute_research(self, query: str, selected_agents: List[str] = None, preferred_model: str = 'openai', context: str = '', deep_research_options: Dict[str, Any] = None, rag_manager=None) -> Dict[str, Any]:
         """Execute research using selected agents"""
         if selected_agents is None:
             selected_agents = list(self.agents.keys())
@@ -442,20 +456,53 @@ class AgentManager:
         else:
             merged_options = default_deep_research_options
 
+        # Check for RAG configuration from the first agent
+        rag_config = None
+        if selected_agents and len(selected_agents) > 0:
+            first_agent = self.agents.get(selected_agents[0])
+            if first_agent and hasattr(first_agent, 'template_config') and first_agent.template_config:
+                template_config = first_agent.template_config
+                if template_config.get('rag_enabled', False) and template_config.get('document_links'):
+                    rag_config = {
+                        'enabled': True,
+                        'document_links': template_config.get('document_links', []),
+                        'top_k': template_config.get('rag_top_k', 5),
+                        'context_window': template_config.get('rag_context_window', 2)
+                    }
+
         results = {
             'query': query,
             'timestamp': datetime.now().isoformat(),
             'agents_used': selected_agents,
             'preferred_model': preferred_model,
             'deep_research_options': merged_options,
+            'rag_config': rag_config,
             'web_search_results': [],
+            'rag_results': None,
             'results': []
         }
 
         # Use merged options for web search
         deep_research_options = merged_options
-        
-        # Perform web search if enabled
+
+        # Perform RAG search if enabled (takes precedence over web search)
+        if rag_config and rag_config.get('enabled') and rag_manager:
+            try:
+                print("Performing RAG search instead of web search")
+                rag_result = rag_manager.generate_rag_response(
+                    query=query,
+                    top_k=rag_config.get('top_k', 5),
+                    llm_manager=self.llm_manager,
+                    preferred_model=preferred_model
+                )
+                results['rag_results'] = rag_result
+                # Skip web search when RAG is enabled
+                deep_research_options['enableWebSearch'] = False
+            except Exception as e:
+                print(f"RAG search failed: {e}")
+                results['rag_error'] = str(e)
+
+        # Perform web search if enabled (and RAG is not enabled)
         if deep_research_options and deep_research_options.get('enableWebSearch'):
             try:
                 from search.web_search import web_search_manager
@@ -502,11 +549,16 @@ class AgentManager:
         def run_agent(agent_name):
             try:
                 agent = self.get_agent(agent_name)
-                # Pass context and web search results to the agent
+                # Pass context, web search results, and RAG results to the agent
                 context_dict = {'previous_research': context} if context else {}
                 if deep_research_options and deep_research_options.get('enableWebSearch'):
                     context_dict['web_search_results'] = results.get('web_search_results', [])
                     context_dict['deep_research_enabled'] = deep_research_options.get('enableDeepResearch', False)
+
+                # Add RAG results if available
+                if results.get('rag_results'):
+                    context_dict['rag_results'] = results['rag_results']
+                    context_dict['rag_enabled'] = True
                 
                 result = agent.process_query(query, context_dict)
                 agent_results[agent_name] = result
@@ -531,10 +583,15 @@ class AgentManager:
         
         # Collect results
         results['results'] = list(agent_results.values())
-        
+
         # Generate summary using the preferred model
-        results['summary'] = self._generate_summary(query, agent_results, preferred_model, results.get('web_search_results', []))
-        
+        # If RAG was used, use RAG results for summary generation
+        if results.get('rag_results'):
+            results['summary'] = results['rag_results'].get('response', 'RAG回答生成失败')
+            results['rag_sources'] = results['rag_results'].get('sources', [])
+        else:
+            results['summary'] = self._generate_summary(query, agent_results, preferred_model, results.get('web_search_results', []))
+
         return results
     
     def _generate_summary(self, query: str, agent_results: Dict[str, Any], preferred_model: str = 'openai', web_search_results: List[Dict[str, Any]] = None) -> str:

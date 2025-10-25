@@ -15,6 +15,7 @@ from llm.llm_manager import LLMManager
 from utils.config import Config
 from management.agent_manager import agent_manager as dynamic_agent_manager
 from conversation.conversation_manager import ConversationManager, ConversationTurn
+from rag.rag_manager import RAGManager
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
@@ -24,6 +25,14 @@ config = Config()
 llm_manager = LLMManager(config)
 agent_manager = AgentManager(llm_manager)
 conversation_manager = ConversationManager()
+
+# Initialize RAG manager
+try:
+    rag_manager = RAGManager()
+    print("RAG manager initialized successfully")
+except Exception as e:
+    print(f"Failed to initialize RAG manager: {e}")
+    rag_manager = None
 
 @app.route('/')
 def index():
@@ -96,7 +105,7 @@ def research():
                 pass  # Agent not found, continue with default
         
         # Execute research using selected agents and model
-        result = agent_manager.execute_research(query, selected_agents, selected_model, context, deep_research_options)
+        result = agent_manager.execute_research(query, selected_agents, selected_model, context, deep_research_options, rag_manager)
         
         # Update turn with results
         turn.result = result
@@ -508,6 +517,184 @@ def get_agent_defaults(agent_id):
 
     except Exception as e:
         return jsonify({'error': f'Failed to get agent defaults: {str(e)}'}), 500
+
+# RAG Document Management API endpoints
+@app.route('/api/rag/documents', methods=['GET'])
+def get_documents():
+    """Get list of loaded documents"""
+    try:
+        if not rag_manager:
+            return jsonify({'error': 'RAG manager not available'}), 503
+
+        documents = rag_manager.list_documents()
+        stats = rag_manager.get_stats()
+
+        return jsonify({
+            'success': True,
+            'documents': documents,
+            'stats': stats
+        })
+
+    except Exception as e:
+        return jsonify({'error': f'Failed to get documents: {str(e)}'}), 500
+
+@app.route('/api/rag/documents', methods=['POST'])
+def add_document():
+    """Add a new document to RAG system"""
+    try:
+        if not rag_manager:
+            return jsonify({'error': 'RAG manager not available'}), 503
+
+        data = request.get_json()
+        file_path = data.get('file_path', '')
+
+        if not file_path:
+            return jsonify({'error': 'No file path provided'}), 400
+
+        result = rag_manager.add_document(file_path)
+
+        if result['success']:
+            return jsonify(result), 201
+        else:
+            return jsonify(result), 400
+
+    except Exception as e:
+        return jsonify({'error': f'Failed to add document: {str(e)}'}), 500
+
+@app.route('/api/rag/documents/upload', methods=['POST'])
+def upload_document():
+    """Upload and add a document file"""
+    try:
+        if not rag_manager:
+            return jsonify({'error': 'RAG manager not available'}), 503
+
+        if 'file' not in request.files:
+            return jsonify({'error': 'No file provided'}), 400
+
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({'error': 'No file selected'}), 400
+
+        # Save uploaded file to documents directory
+        file_path = os.path.join(rag_manager.documents_dir, file.filename)
+        file.save(file_path)
+
+        # Add to RAG system
+        result = rag_manager.add_document(file_path)
+
+        if result['success']:
+            return jsonify(result), 201
+        else:
+            # Remove uploaded file if RAG addition failed
+            if os.path.exists(file_path):
+                os.remove(file_path)
+            return jsonify(result), 400
+
+    except Exception as e:
+        return jsonify({'error': f'Failed to upload document: {str(e)}'}), 500
+
+@app.route('/api/rag/documents/<document_id>', methods=['DELETE'])
+def remove_document(document_id):
+    """Remove a document from RAG system"""
+    try:
+        if not rag_manager:
+            return jsonify({'error': 'RAG manager not available'}), 503
+
+        success = rag_manager.remove_document(document_id)
+
+        if success:
+            return jsonify({
+                'success': True,
+                'message': f'Document {document_id} removed successfully'
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': f'Failed to remove document {document_id}'
+            }), 404
+
+    except Exception as e:
+        return jsonify({'error': f'Failed to remove document: {str(e)}'}), 500
+
+@app.route('/api/rag/documents/<document_id>', methods=['GET'])
+def get_document_info(document_id):
+    """Get detailed information about a document"""
+    try:
+        if not rag_manager:
+            return jsonify({'error': 'RAG manager not available'}), 503
+
+        document_info = rag_manager.get_document_info(document_id)
+
+        if document_info:
+            return jsonify({
+                'success': True,
+                'document': document_info
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Document not found'
+            }), 404
+
+    except Exception as e:
+        return jsonify({'error': f'Failed to get document info: {str(e)}'}), 500
+
+@app.route('/api/rag/query', methods=['POST'])
+def query_documents():
+    """Query the document collection directly"""
+    try:
+        if not rag_manager:
+            return jsonify({'error': 'RAG manager not available'}), 503
+
+        data = request.get_json()
+        query = data.get('query', '')
+        document_ids = data.get('document_ids', None)
+        top_k = data.get('top_k', 5)
+
+        if not query:
+            return jsonify({'error': 'No query provided'}), 400
+
+        result = rag_manager.query_documents(query, document_ids, top_k)
+
+        return jsonify({
+            'success': True,
+            'result': result
+        })
+
+    except Exception as e:
+        return jsonify({'error': f'Failed to query documents: {str(e)}'}), 500
+
+@app.route('/api/rag/generate', methods=['POST'])
+def generate_rag_response():
+    """Generate RAG response for a query"""
+    try:
+        if not rag_manager:
+            return jsonify({'error': 'RAG manager not available'}), 503
+
+        data = request.get_json()
+        query = data.get('query', '')
+        document_ids = data.get('document_ids', None)
+        top_k = data.get('top_k', 5)
+        model = data.get('model', 'openai')
+
+        if not query:
+            return jsonify({'error': 'No query provided'}), 400
+
+        result = rag_manager.generate_rag_response(
+            query=query,
+            document_ids=document_ids,
+            top_k=top_k,
+            llm_manager=llm_manager,
+            preferred_model=model
+        )
+
+        return jsonify({
+            'success': True,
+            'result': result
+        })
+
+    except Exception as e:
+        return jsonify({'error': f'Failed to generate RAG response: {str(e)}'}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5050)
