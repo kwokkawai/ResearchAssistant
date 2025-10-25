@@ -448,42 +448,6 @@ def get_agent_metadata():
     except Exception as e:
         return jsonify({'error': f'Failed to get metadata: {str(e)}'}), 500
 
-@app.route('/api/templates/<template_id>', methods=['GET'])
-def get_template(template_id):
-    """Get a specific template"""
-    try:
-        template = dynamic_agent_manager.get_template(template_id)
-        if template:
-            return jsonify({
-                'success': True,
-                'template': template.to_dict()
-            })
-        else:
-            return jsonify({'error': 'Template not found'}), 404
-    except Exception as e:
-        return jsonify({'error': f'Failed to get template: {str(e)}'}), 500
-
-@app.route('/api/templates/<template_id>', methods=['PUT'])
-def update_template(template_id):
-    """Update a specific template"""
-    try:
-        data = request.get_json()
-        # Convert the config data to template format
-        template_data = {
-            'name': data.get('name', template_id),
-            'description': data.get('description', ''),
-            'config': data.get('config', {})
-        }
-
-        if dynamic_agent_manager.update_template(template_id, **template_data):
-            return jsonify({
-                'success': True,
-                'message': 'Template updated successfully'
-            })
-        else:
-            return jsonify({'error': 'Failed to update template'}), 400
-    except Exception as e:
-        return jsonify({'error': f'Failed to update template: {str(e)}'}), 500
 
 @app.route('/api/health')
 def health_check():
