@@ -448,18 +448,6 @@ def get_agent_metadata():
     except Exception as e:
         return jsonify({'error': f'Failed to get metadata: {str(e)}'}), 500
 
-@app.route('/api/templates', methods=['GET'])
-def get_templates():
-    """Get all available templates"""
-    try:
-        templates = dynamic_agent_manager.get_all_templates()
-        return jsonify({
-            'success': True,
-            'templates': [template.to_dict() for template in templates]
-        })
-    except Exception as e:
-        return jsonify({'error': f'Failed to get templates: {str(e)}'}), 500
-
 @app.route('/api/templates/<template_id>', methods=['GET'])
 def get_template(template_id):
     """Get a specific template"""

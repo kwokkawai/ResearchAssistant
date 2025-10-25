@@ -173,7 +173,7 @@ class AgentManager:
                             'template_id': template_id,
                             'name': template_data.get('name', template_id),
                             'description': template_data.get('description', ''),
-                            'agent_ids': [],  # Templates don't contain agent lists in new design
+                            'agents': [],  # Templates don't contain agent lists in new design
                             'config': template_data.get('config', {})
                         }
                         self.templates[template_id] = AgentTemplate.from_dict(agent_template_data)
