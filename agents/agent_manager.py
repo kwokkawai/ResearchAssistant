@@ -294,12 +294,8 @@ class DynamicAgent(Agent):
 
     @property
     def template_config(self):
-        """Get template config from agent definition"""
-        config = self.agent_definition.template_config if self.agent_definition else {}
-        # Debug: print config for technical agent
-        if self.agent_definition and self.agent_definition.agent_id == 'technical':
-            print(f"DEBUG: Technical agent template_config: {config}")
-        return config
+        """Get template config from agent definition, resolving template_id if needed"""
+        return dynamic_agent_manager.get_agent_template_config(self.agent_definition)
     
     def process_query(self, query: str, context: Dict[str, Any] = None) -> Dict[str, Any]:
         """Process query using dynamic prompt template"""

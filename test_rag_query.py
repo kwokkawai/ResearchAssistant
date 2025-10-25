@@ -42,7 +42,8 @@ def test_rag_query():
     # 步骤1: 只测试检索（不生成回答）
     print("\n📖 步骤1: 测试文档检索")
     query_result = rag_manager.query_documents(test_query, top_k=3)
-    print("检索结果:"    print(f"  - 找到的源数量: {query_result.get('total_sources', 0)}")
+    print("检索结果:")
+    print(f"  - 找到的源数量: {query_result.get('total_sources', 0)}")
     print(f"  - 上下文长度: {len(query_result.get('context', ''))} 字符")
 
     if query_result.get('sources'):
@@ -53,29 +54,30 @@ def test_rag_query():
     # 显示检索到的上下文内容
     context = query_result.get('context', '')
     if context:
-        print("
-📄 检索到的上下文内容 (前500字符):"        print(f"  '{context[:500]}{'...' if len(context) > 500 else ''}'")
+        print("\n📄 检索到的上下文内容 (前500字符):")
+        print(f"  '{context[:500]}{'...' if len(context) > 500 else ''}'")
     else:
         print("❌ 没有检索到上下文内容！")
         return
 
     # 步骤2: 测试完整RAG生成
-    print("
-🤖 步骤2: 测试RAG回答生成"    rag_result = rag_manager.generate_rag_response(
+    print("\n🤖 步骤2: 测试RAG回答生成")
+    rag_result = rag_manager.generate_rag_response(
         query=test_query,
         top_k=3,
         llm_manager=llm_manager,
         preferred_model='openai'  # 或者 'gemini'
     )
 
-    print("RAG生成结果:"    print(f"  - 响应长度: {len(rag_result.get('response', ''))} 字符")
+    print("RAG生成结果:")
+    print(f"  - 响应长度: {len(rag_result.get('response', ''))} 字符")
     print(f"  - 使用文档数量: {rag_result.get('document_count', 0)}")
     print(f"  - 置信度: {rag_result.get('confidence', 0):.3f}")
 
     response = rag_result.get('response', '')
     if response:
-        print("
-📝 生成的回答 (前300字符):"        print(f"  '{response[:300]}{'...' if len(response) > 300 else ''}'")
+        print("\n📝 生成的回答 (前300字符):")
+        print(f"  '{response[:300]}{'...' if len(response) > 300 else ''}'")
 
         # 检查回答是否基于文档内容
         context_lower = context.lower()

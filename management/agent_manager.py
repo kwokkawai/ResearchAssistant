@@ -13,9 +13,9 @@ import uuid
 class AgentDefinition:
     """Represents a single agent definition"""
     
-    def __init__(self, agent_id: str, name: str, description: str, icon: str, 
-                 color: str, prompt_template: str, enabled: bool = True, 
-                 template_config: Dict[str, Any] = None):
+    def __init__(self, agent_id: str, name: str, description: str, icon: str,
+                 color: str, prompt_template: str, enabled: bool = True,
+                 template_id: str = None, template_config: Dict[str, Any] = None):
         self.agent_id = agent_id
         self.name = name
         self.description = description
@@ -23,7 +23,10 @@ class AgentDefinition:
         self.color = color
         self.prompt_template = prompt_template
         self.enabled = enabled
-        self.template_config = template_config or self._get_default_template_config()
+        self.template_id = template_id
+        # For backward compatibility, still support direct template_config
+        # If template_id is provided, template_config will be resolved later by the manager
+        self.template_config = template_config
         self.created_at = datetime.now().isoformat()
         self.updated_at = datetime.now().isoformat()
     
@@ -75,6 +78,7 @@ class AgentDefinition:
             color=data['color'],
             prompt_template=data['prompt_template'],
             enabled=data.get('enabled', True),
+            template_id=data.get('template_id'),
             template_config=data.get('template_config')
         )
         agent.created_at = data.get('created_at', agent.created_at)
@@ -143,11 +147,8 @@ class AgentManager:
                     agent_data['agent_id'] = agent_id
                     self.agents[agent_id] = AgentDefinition.from_dict(agent_data)
                 
-                # Load templates
-                self.templates = {}
-                for template_id, template_data in data.get('templates', {}).items():
-                    template_data['template_id'] = template_id
-                    self.templates[template_id] = AgentTemplate.from_dict(template_data)
+                # Load templates from separate file
+                self._load_templates_from_file()
                 
                 # Load metadata
                 self.metadata = data.get('metadata', {})
@@ -157,7 +158,67 @@ class AgentManager:
         except Exception as e:
             print(f"Error loading agent data: {e}")
             self._initialize_default_data()
-    
+
+    def _load_templates_from_file(self):
+        """Load templates from templates.json"""
+        try:
+            templates_file = os.path.join(os.path.dirname(__file__), '..', 'data', 'templates.json')
+            if os.path.exists(templates_file):
+                with open(templates_file, 'r', encoding='utf-8') as f:
+                    templates_data = json.load(f)
+                    self.templates = {}
+                    for template_id, template_data in templates_data.items():
+                        # Convert template config format to AgentTemplate format
+                        agent_template_data = {
+                            'template_id': template_id,
+                            'name': template_data.get('name', template_id),
+                            'description': template_data.get('description', ''),
+                            'agent_ids': [],  # Templates don't contain agent lists in new design
+                            'config': template_data.get('config', {})
+                        }
+                        self.templates[template_id] = AgentTemplate.from_dict(agent_template_data)
+                    print(f"Loaded {len(self.templates)} templates from templates.json")
+            else:
+                print("Warning: templates.json not found")
+                self.templates = {}
+        except Exception as e:
+            print(f"Error loading templates from file: {e}")
+            self.templates = {}
+
+    def get_agent_template_config(self, agent: AgentDefinition) -> Dict[str, Any]:
+        """Get template configuration for an agent, resolving template_id if needed"""
+        if agent.template_config:
+            # Direct template config (backward compatibility)
+            return agent.template_config
+        elif agent.template_id and agent.template_id in self.templates:
+            # Resolve from template
+            template = self.templates[agent.template_id]
+            return template.config if hasattr(template, 'config') else {}
+        else:
+            # Fallback to default
+            return self._get_default_template_config()
+
+    def _get_default_template_config(self) -> Dict[str, Any]:
+        """Get default template configuration"""
+        return {
+            "default_model": "openai",
+            "preferred_ollama_model": "deepseek-r1:latest",
+            "preferred_openai_model": "gpt-4o",
+            "preferred_gemini_model": "gemini-1.5-pro",
+            "deep_research_enabled": True,
+            "web_search_enabled": True,
+            "search_engine": "duckduckgo",
+            "search_results_count": 10,
+            "include_images": False,
+            "temperature": 0.7,
+            "max_tokens": 2000,
+            "timeout": 300,
+            "rag_enabled": False,
+            "rag_top_k": 5,
+            "rag_context_window": 2,
+            "document_links": []
+        }
+
     def save_data(self):
         """Save agent definitions to JSON file"""
         try:
