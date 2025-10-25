@@ -80,7 +80,7 @@ def chat():
     
     except Exception as e:
         logger.error(f"处理聊天请求时出错: {str(e)}")
-        return jsonify({'error': f'处理请求时出错: {str(e)}'}), 500
+        return jsonify({'error': '处理请求时出错，请稍后重试'}), 500
 
 
 @app.route('/api/agents', methods=['GET'])
