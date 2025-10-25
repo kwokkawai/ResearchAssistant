@@ -291,6 +291,11 @@ class DynamicAgent(Agent):
     def __init__(self, name: str, description: str, llm_manager: LLMManager, agent_definition):
         super().__init__(name, description, llm_manager)
         self.agent_definition = agent_definition
+
+    @property
+    def template_config(self):
+        """Get template config from agent definition"""
+        return self.agent_definition.get('template_config', {}) if self.agent_definition else {}
     
     def process_query(self, query: str, context: Dict[str, Any] = None) -> Dict[str, Any]:
         """Process query using dynamic prompt template"""
