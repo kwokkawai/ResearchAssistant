@@ -736,9 +736,9 @@ DEBUG=True python run.py
 
 ## 📞 联系方式
 
-- **项目维护者**: [您的姓名]
-- **邮箱**: [您的邮箱]
-- **GitHub**: [您的GitHub链接]
+- **项目维护者**: Paul Kwok
+- **邮箱**: pkwok@hotmail.com
+- **GitHub**: https://github.com/kwokkawai
 
 ## 🙏 致谢
 
