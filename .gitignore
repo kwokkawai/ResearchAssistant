@@ -63,3 +63,12 @@ logs/
 # Temporary files
 tmp/
 temp/
+
+# Vector Database (User Data)
+data/vector_store/*
+!data/vector_store/.gitkeep
+
+# Document Tracking (Runtime Data)
+documents/.document_tracking.json
+documents/*
+!documents/.gitkeep
