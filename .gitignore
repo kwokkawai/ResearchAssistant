@@ -72,3 +72,16 @@ data/vector_store/*
 documents/.document_tracking.json
 documents/*
 !documents/.gitkeep
+
+# Test and Debug Files
+test_*.py
+test_*.html
+debug_*.py
+*_debug.html
+*_test.py
+start_*.py
+verify_*.py
+diagnose_*.py
+*_测试指南.md
+*_test*.html
+RAG_*.md
