@@ -785,3 +785,5 @@ DEBUG=True python run.py
 **迷途小書僮 v0.3** - 让研究更智能，让思考更深入 🧠✨
 
 专业级智能体 | 本地RAG | 多LLM支持 | 100%隐私保护
+
+** Paul Kwok
