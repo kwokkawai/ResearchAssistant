@@ -45,22 +45,60 @@ class VectorStore:
         self._initialize_vector_store()
 
     def _initialize_embedding_model(self):
-        """Initialize the sentence transformer model"""
+        """Initialize the sentence transformer model with offline support"""
         if not CHROMADB_AVAILABLE:
             raise ImportError("ChromaDB and sentence-transformers are required for VectorStore")
 
-        try:
-            self.embedding_model = SentenceTransformer(self.embedding_model_name)
-            print(f"Loaded embedding model: {self.embedding_model_name}")
-        except Exception as e:
-            print(f"Error loading embedding model: {e}")
-            # Fallback to a smaller model
+        # Set local_files_only for offline mode
+        model_cache_dir = os.path.expanduser("~/.cache/huggingface/hub")
+        
+        # Try to load models in order: cached primary -> cached fallback -> download primary -> download fallback
+        models_to_try = [
+            (self.embedding_model_name, True, "从缓存加载主模型"),
+            ('all-MiniLM-L6-v2', True, "从缓存加载备用模型"),
+            (self.embedding_model_name, False, "下载主模型"),
+            ('all-MiniLM-L6-v2', False, "下载备用模型")
+        ]
+        
+        last_error = None
+        for model_name, local_only, description in models_to_try:
             try:
-                self.embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
-                self.embedding_model_name = 'all-MiniLM-L6-v2'
-                print(f"Fallback to embedding model: {self.embedding_model_name}")
-            except Exception as e2:
-                raise Exception(f"Failed to load any embedding model: {e2}")
+                print(f"🔄 尝试{description}: {model_name} (offline={local_only})")
+                
+                # Prepare kwargs for SentenceTransformer
+                model_kwargs = {
+                    'cache_folder': model_cache_dir,
+                    'device': 'cpu'
+                }
+                
+                # Add local_files_only if trying to load from cache
+                if local_only:
+                    model_kwargs['local_files_only'] = True
+                
+                self.embedding_model = SentenceTransformer(
+                    model_name,
+                    **model_kwargs
+                )
+                
+                if local_only:
+                    # Verify model loaded from cache
+                    self.embedding_model.eval()
+                
+                self.embedding_model_name = model_name
+                print(f"✅ 成功加载模型: {model_name} ({'离线模式' if local_only else '在线模式'})")
+                return
+                
+            except Exception as e:
+                last_error = e
+                print(f"⚠️ 失败: {description} - {str(e)[:100]}")
+                continue
+        
+        # If all attempts failed, raise the last error
+        raise Exception(f"❌ 无法加载任何嵌入模型。最后错误: {last_error}\n\n"
+                       f"解决方案:\n"
+                       f"1. 连接网络后首次运行以下载模型\n"
+                       f"2. 或手动下载模型到: {model_cache_dir}\n"
+                       f"3. 或使用简化版RAG（不需要向量存储）")
 
     def _initialize_vector_store(self):
         """Initialize ChromaDB vector store"""

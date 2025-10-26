@@ -21,11 +21,24 @@ class RAGManager:
         self.documents_dir.mkdir(exist_ok=True)
 
         self.document_processor = DocumentProcessor(str(self.documents_dir))
-        self.vector_store = VectorStore(vector_store_dir)
+        
+        # Initialize vector store with error handling
+        self.vector_store = None
+        self.initialization_error = None
+        
+        try:
+            print("🔄 正在初始化RAG向量存储...")
+            self.vector_store = VectorStore(vector_store_dir)
+            print("✅ RAG向量存储初始化成功")
+        except Exception as e:
+            self.initialization_error = str(e)
+            print(f"❌ RAG向量存储初始化失败: {e}")
+            print("⚠️ RAG功能将不可用，但应用可以继续使用其他功能")
 
         # Track loaded documents
         self.loaded_documents = set()
-        self._load_existing_documents()
+        if self.vector_store:
+            self._load_existing_documents()
 
     def _load_existing_documents(self):
         """Load tracking information for existing documents"""
@@ -51,8 +64,36 @@ class RAGManager:
         except Exception as e:
             print(f"Warning: Failed to save document tracking: {e}")
 
+    def is_available(self) -> bool:
+        """Check if RAG system is available"""
+        return self.vector_store is not None
+    
+    def get_status(self) -> Dict[str, Any]:
+        """Get RAG system status"""
+        if self.vector_store:
+            return {
+                'available': True,
+                'message': 'RAG系统运行正常'
+            }
+        else:
+            return {
+                'available': False,
+                'error': self.initialization_error,
+                'message': 'RAG系统初始化失败。可能原因：\n'
+                          '1. 无法连接网络下载模型\n'
+                          '2. 缺少必要的依赖包\n'
+                          '请连接网络后重启应用，或联系管理员。'
+            }
+
     def add_document(self, file_path: str) -> Dict[str, Any]:
         """Add a single document to the RAG system"""
+        if not self.is_available():
+            return {
+                'success': False,
+                'error': f'RAG系统不可用: {self.initialization_error}',
+                'document_id': None
+            }
+        
         try:
             # Validate file
             is_valid, message = self.document_processor.validate_file(file_path)

@@ -454,19 +454,55 @@ class AgentManager:
         # Get default settings from agent template configs
         default_deep_research_options = self._get_default_deep_research_options(selected_agents)
 
-        # Merge user settings with defaults (user settings override defaults)
+        # Merge user settings with defaults
+        # Only override defaults with user settings that are explicitly provided (not None/empty)
         if deep_research_options:
             merged_options = default_deep_research_options.copy()
-            merged_options.update(deep_research_options)
+            # Only update with non-None, non-empty values from user
+            for key, value in deep_research_options.items():
+                # Only override if the value is meaningful (not None, not empty string)
+                if value is not None and value != '':
+                    merged_options[key] = value
         else:
             merged_options = default_deep_research_options
+        
+        print(f"🔧 深度研究选项合并结果:")
+        print(f"   默认选项: {default_deep_research_options}")
+        print(f"   用户选项: {deep_research_options}")
+        print(f"   合并后: {merged_options}")
 
-        # Check for RAG configuration from the first agent
+        # Check for RAG configuration and model settings from the first agent's template
         rag_config = None
+        template_model = None
+        template_specific_model = None
+        
         if selected_agents and len(selected_agents) > 0:
             first_agent = self.agents.get(selected_agents[0])
             if first_agent and hasattr(first_agent, 'template_config') and first_agent.template_config:
                 template_config = first_agent.template_config
+                
+                # Get model configuration from template
+                template_model = template_config.get('default_model', None)
+                if template_model == 'openai':
+                    template_specific_model = template_config.get('preferred_openai_model', 'gpt-4o')
+                elif template_model == 'gemini':
+                    template_specific_model = template_config.get('preferred_gemini_model', 'gemini-1.5-pro')
+                elif template_model == 'ollama':
+                    template_specific_model = template_config.get('preferred_ollama_model', None)
+                
+                # Log template model configuration
+                print(f"🔧 智能体模板配置:")
+                print(f"   模板模型类型: {template_model}")
+                print(f"   模板具体模型: {template_specific_model}")
+                print(f"   RAG启用: {template_config.get('rag_enabled', False)}")
+                print(f"   网络搜索启用: {template_config.get('web_search_enabled', False)}")
+                if template_config.get('web_search_enabled', False):
+                    search_engine = template_config.get('search_engine', 'duckduckgo')
+                    search_results = template_config.get('search_results_count', 10)
+                    print(f"   🔍 搜索引擎: {search_engine}")
+                    print(f"   📊 搜索结果数: {search_results}")
+                
+                # Check RAG configuration
                 if template_config.get('rag_enabled', False) and template_config.get('document_links'):
                     rag_config = {
                         'enabled': True,
@@ -474,12 +510,39 @@ class AgentManager:
                         'top_k': template_config.get('rag_top_k', 5),
                         'context_window': template_config.get('rag_context_window', 2)
                     }
+                    print(f"   📄 文档链接: {rag_config['document_links']}")
+                    print(f"   📊 Top-K: {rag_config['top_k']}")
+        
+        # Use template model if available, otherwise fall back to user-provided preferred_model
+        if template_model:
+            actual_model = template_model
+            actual_specific_model = template_specific_model
+            print(f"✅ 使用模板配置的模型: {actual_model} ({actual_specific_model})")
+        else:
+            actual_model = preferred_model
+            actual_specific_model = None
+            print(f"⚠️  未找到模板模型配置，使用默认: {actual_model}")
+        
+        # Update LLM manager with the specific model
+        if actual_specific_model:
+            try:
+                if actual_model == 'ollama':
+                    self.llm_manager.providers['ollama'].model = actual_specific_model
+                    print(f"🔄 设置Ollama模型: {actual_specific_model}")
+                elif actual_model == 'openai':
+                    self.llm_manager.providers['openai'].model = actual_specific_model
+                    print(f"🔄 设置OpenAI模型: {actual_specific_model}")
+                elif actual_model == 'gemini':
+                    self.llm_manager.providers['gemini'].model = actual_specific_model
+                    print(f"🔄 设置Gemini模型: {actual_specific_model}")
+            except Exception as e:
+                print(f"⚠️  设置模型失败: {e}")
 
         results = {
             'query': query,
             'timestamp': datetime.now().isoformat(),
             'agents_used': selected_agents,
-            'preferred_model': preferred_model,
+            'preferred_model': actual_model,  # Use template model, not user-provided model
             'deep_research_options': merged_options,
             'rag_config': rag_config,
             'web_search_results': [],
@@ -499,7 +562,7 @@ class AgentManager:
                     query=query,
                     top_k=rag_config.get('top_k', 5),
                     llm_manager=self.llm_manager,
-                    preferred_model=preferred_model
+                    preferred_model=actual_model  # Use template model for RAG
                 )
 
                 # Check if RAG result is valid (not an error message)
@@ -530,6 +593,9 @@ class AgentManager:
                 # Set search provider
                 search_engine = deep_research_options.get('searchEngine', 'duckduckgo')
                 config = Config()
+                
+                print(f"🔍 执行网络搜索:")
+                print(f"   搜索引擎: {search_engine}")
 
                 if search_engine == 'google':
                     # Get Google Search API credentials from config
@@ -542,21 +608,26 @@ class AgentManager:
                                 api_key=google_api_key,
                                 search_engine_id=google_engine_id
                             )
-                            print("Using Google Custom Search API")
+                            print("   ✅ 使用 Google Custom Search API")
                         except Exception as e:
-                            print(f"Failed to initialize Google Search API: {e}")
-                            print("Falling back to DuckDuckGo")
+                            print(f"   ❌ Google Search API 初始化失败: {e}")
+                            print("   ⚠️  回退到 DuckDuckGo")
                             web_search_manager.set_provider('duckduckgo')
+                            search_engine = 'duckduckgo'
                     else:
-                        print("Google Search API credentials not configured, falling back to DuckDuckGo")
+                        print("   ⚠️  Google Search API 凭据未配置，回退到 DuckDuckGo")
                         web_search_manager.set_provider('duckduckgo')
+                        search_engine = 'duckduckgo'
                 else:
                     web_search_manager.set_provider(search_engine)
+                    print(f"   ✅ 使用 {search_engine} 搜索引擎")
 
                 # Perform search
                 num_results = deep_research_options.get('searchResults', 10)
+                print(f"   📊 搜索结果数: {num_results}")
                 search_results = web_search_manager.search_with_context(query, context, num_results)
                 results['web_search_results'] = search_results
+                print(f"   ✅ 网络搜索完成，获得 {len(search_results)} 个结果")
 
             except Exception as e:
                 print(f"Web search error: {e}")
@@ -604,14 +675,14 @@ class AgentManager:
         # Collect results
         results['results'] = list(agent_results.values())
 
-        # Generate summary using the preferred model
+        # Generate summary using the template model
         # If RAG was successful, use RAG results for summary generation
         if rag_success and results.get('rag_results'):
             results['summary'] = results['rag_results'].get('response', 'RAG回答生成失败')
             results['rag_sources'] = results['rag_results'].get('sources', [])
             print("Using RAG results for final summary")
         else:
-            results['summary'] = self._generate_summary(query, agent_results, preferred_model, results.get('web_search_results', []))
+            results['summary'] = self._generate_summary(query, agent_results, actual_model, results.get('web_search_results', []))
             if results.get('rag_error'):
                 print(f"RAG was enabled but failed, using normal agent responses for summary. RAG error: {results['rag_error']}")
 

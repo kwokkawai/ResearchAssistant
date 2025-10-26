@@ -100,7 +100,7 @@ class AgentTemplate:
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
-        return {
+        result = {
             'template_id': self.template_id,
             'name': self.name,
             'description': self.description,
@@ -109,6 +109,12 @@ class AgentTemplate:
             'created_at': self.created_at,
             'updated_at': self.updated_at
         }
+        
+        # Include config if it exists
+        if hasattr(self, 'config'):
+            result['config'] = self.config
+        
+        return result
     
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'AgentTemplate':
@@ -117,11 +123,16 @@ class AgentTemplate:
             template_id=data['template_id'],
             name=data['name'],
             description=data['description'],
-            agents=data['agents'],
+            agents=data.get('agents', []),  # 兼容旧格式
             enabled=data.get('enabled', True)
         )
         template.created_at = data.get('created_at', template.created_at)
         template.updated_at = data.get('updated_at', template.updated_at)
+        
+        # 如果有config字段，设置它
+        if 'config' in data:
+            template.config = data['config']
+        
         return template
 
 class AgentManager:
@@ -160,12 +171,14 @@ class AgentManager:
             self._initialize_default_data()
 
     def _load_templates_from_file(self):
-        """Load templates from templates.json"""
+        """Load templates from agent_definitions.json (templates section)"""
         try:
-            templates_file = os.path.join(os.path.dirname(__file__), '..', 'data', 'templates.json')
-            if os.path.exists(templates_file):
-                with open(templates_file, 'r', encoding='utf-8') as f:
-                    templates_data = json.load(f)
+            # Templates are in the same file as agents (agent_definitions.json)
+            agents_file = os.path.join(os.path.dirname(__file__), '..', 'data', 'agent_definitions.json')
+            if os.path.exists(agents_file):
+                with open(agents_file, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    templates_data = data.get('templates', {})
                     self.templates = {}
                     for template_id, template_data in templates_data.items():
                         # Convert template config format to AgentTemplate format
@@ -174,15 +187,25 @@ class AgentManager:
                             'name': template_data.get('name', template_id),
                             'description': template_data.get('description', ''),
                             'agents': [],  # Templates don't contain agent lists in new design
+                            'enabled': template_data.get('enabled', True),
                             'config': template_data.get('config', {})
                         }
-                        self.templates[template_id] = AgentTemplate.from_dict(agent_template_data)
-                    print(f"Loaded {len(self.templates)} templates from templates.json")
+                        template = AgentTemplate.from_dict(agent_template_data)
+                        self.templates[template_id] = template
+                    print(f"✅ 加载了 {len(self.templates)} 个模板配置")
+                    
+                    # Log template details for debugging
+                    for template_id, template in self.templates.items():
+                        if hasattr(template, 'config'):
+                            config = template.config
+                            print(f"   📋 {template.name}: default_model={config.get('default_model')}, rag_enabled={config.get('rag_enabled')}")
             else:
-                print("Warning: templates.json not found")
+                print("⚠️  Warning: agent_definitions.json not found")
                 self.templates = {}
         except Exception as e:
-            print(f"Error loading templates from file: {e}")
+            print(f"❌ Error loading templates from file: {e}")
+            import traceback
+            traceback.print_exc()
             self.templates = {}
 
     def get_agent_template_config(self, agent: AgentDefinition) -> Dict[str, Any]:
@@ -315,15 +338,87 @@ class AgentManager:
         """Update an existing template"""
         if template_id not in self.templates:
             return False
-        
+
         template = self.templates[template_id]
         for key, value in kwargs.items():
             if hasattr(template, key):
                 setattr(template, key, value)
-        
+
         template.updated_at = datetime.now().isoformat()
         self.save_data()
         return True
+
+    def update_template_config(self, template_id: str, config: Dict[str, Any]) -> bool:
+        """Update template configuration"""
+        if template_id not in self.templates:
+            return False
+
+        template = self.templates[template_id]
+        template.config = config
+        template.updated_at = datetime.now().isoformat()
+        
+        # Save templates to templates.json
+        self.save_templates()
+        
+        # Also save to agent_definitions.json for backward compatibility
+        self.save_data()
+        return True
+    
+    def save_templates(self):
+        """Save templates back to agent_definitions.json (templates section)"""
+        try:
+            agents_file = os.path.join(os.path.dirname(__file__), '..', 'data', 'agent_definitions.json')
+            
+            # Read the entire file first
+            with open(agents_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            
+            # Convert templates to dictionary format
+            templates_data = {}
+            for template_id, template in self.templates.items():
+                templates_data[template_id] = {
+                    'template_id': template.template_id,
+                    'name': template.name,
+                    'description': template.description,
+                    'agents': [],  # Keep empty for new design
+                    'config': template.config if hasattr(template, 'config') else {},
+                    'enabled': template.enabled if hasattr(template, 'enabled') else True,
+                    'created_at': template.created_at,
+                    'updated_at': template.updated_at
+                }
+            
+            # Update the templates section
+            data['templates'] = templates_data
+            
+            # Update metadata
+            if 'metadata' in data:
+                data['metadata']['last_updated'] = datetime.now().isoformat()
+                data['metadata']['total_templates'] = len(templates_data)
+            
+            # Write back to file
+            with open(agents_file, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+            
+            print(f"✅ 成功保存 {len(templates_data)} 个模板配置到 agent_definitions.json")
+            return True
+        except Exception as e:
+            print(f"❌ Error saving templates to file: {e}")
+            import traceback
+            traceback.print_exc()
+            return False
+
+    def validate_template_config(self, config: Dict[str, Any]) -> Dict[str, Any]:
+        """Validate template configuration for mutual exclusivity"""
+        web_search = config.get('web_search_enabled', False)
+        rag_enabled = config.get('rag_enabled', False)
+
+        # 互斥验证：不能同时启用网络搜索和RAG
+        if web_search and rag_enabled:
+            # 优先保留RAG，因为它提供更准确的答案
+            config['web_search_enabled'] = False
+            print("Warning: Both web search and RAG enabled. Disabled web search to maintain consistency.")
+
+        return config
     
     def delete_template(self, template_id: str) -> bool:
         """Delete a template"""
@@ -415,12 +510,6 @@ class AgentManager:
             'last_updated': self.metadata.get('last_updated', 'Unknown')
         }
     
-    def get_agent_template_config(self, agent_id: str) -> Dict[str, Any]:
-        """Get template configuration for a specific agent"""
-        agent = self.get_agent(agent_id)
-        if agent:
-            return agent.template_config
-        return {}
     
     def update_agent_template_config(self, agent_id: str, config: Dict[str, Any]) -> bool:
         """Update template configuration for a specific agent"""

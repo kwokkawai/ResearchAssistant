@@ -3,7 +3,7 @@ Research Assistant Flask Application
 A multi-agent research assistant using local and cloud LLMs
 """
 
-from flask import Flask, render_template, request, jsonify, session
+from flask import Flask, render_template, request, jsonify, session, send_file
 import os
 from datetime import datetime
 import json
@@ -38,6 +38,31 @@ except Exception as e:
 def index():
     """Main research assistant interface"""
     return render_template('index.html')
+
+@app.route('/diagnostic')
+def diagnostic():
+    """RAG API diagnostic page"""
+    return render_template('rag_diagnostic.html')
+
+@app.route('/debug_button')
+def debug_button():
+    """Debug agent management button"""
+    return render_template('debug_agent_button.html')
+
+@app.route('/complete_check')
+def complete_check():
+    """Complete architecture check"""
+    return render_template('complete_check.html')
+
+@app.route('/button_test')
+def button_test():
+    """Button test page"""
+    return render_template('button_test.html')
+
+@app.route('/fix_button')
+def fix_button():
+    """Button fix page"""
+    return send_file('fix_button.html')
 
 @app.route('/api/research', methods=['POST'])
 def research():
@@ -368,29 +393,51 @@ def create_template():
 
 @app.route('/api/templates/<template_id>', methods=['PUT'])
 def update_template(template_id):
-    """Update template"""
+    """Update template config"""
     try:
         data = request.get_json()
-        
-        # Only update provided fields
-        update_data = {}
-        allowed_fields = ['name', 'description', 'agents', 'enabled']
-        
-        for field in allowed_fields:
-            if field in data:
-                if field == 'agents':
-                    # Validate agent IDs
-                    update_data[field] = dynamic_agent_manager.validate_agent_ids(data[field])
-                else:
-                    update_data[field] = data[field]
-        
-        if dynamic_agent_manager.update_template(template_id, **update_data):
-            return jsonify({
-                'success': True,
-                'message': 'Template updated successfully'
-            })
+        print(f"📝 收到模板更新请求: template_id={template_id}")
+        print(f"📋 请求数据: {data}")
+
+        # Handle new template config structure
+        if 'config' in data:
+            print(f"✅ 处理新模板配置结构")
+            # Validate template configuration for mutual exclusivity
+            config = data.get('config', {})
+            print(f"📊 原始配置: {config}")
+            
+            config = dynamic_agent_manager.validate_template_config(config)
+            print(f"✅ 验证后的配置: {config}")
+
+            if dynamic_agent_manager.update_template_config(template_id, config):
+                print(f"✅ 模板配置已更新: {template_id}")
+                return jsonify({
+                    'success': True,
+                    'message': 'Template config updated successfully'
+                })
+            else:
+                print(f"❌ 模板未找到: {template_id}")
+                return jsonify({'error': 'Template not found'}), 404
         else:
-            return jsonify({'error': 'Template not found'}), 404
+            # Handle old template structure for backward compatibility
+            update_data = {}
+            allowed_fields = ['name', 'description', 'agents', 'enabled']
+
+            for field in allowed_fields:
+                if field in data:
+                    if field == 'agents':
+                        # Validate agent IDs
+                        update_data[field] = dynamic_agent_manager.validate_agent_ids(data[field])
+                    else:
+                        update_data[field] = data[field]
+
+            if dynamic_agent_manager.update_template(template_id, **update_data):
+                return jsonify({
+                    'success': True,
+                    'message': 'Template updated successfully'
+                })
+            else:
+                return jsonify({'error': 'Template not found'}), 404
     except Exception as e:
         return jsonify({'error': f'Failed to update template: {str(e)}'}), 500
 
@@ -520,12 +567,39 @@ def get_agent_defaults(agent_id):
         return jsonify({'error': f'Failed to get agent defaults: {str(e)}'}), 500
 
 # RAG Document Management API endpoints
+@app.route('/api/rag/status', methods=['GET'])
+def get_rag_status():
+    """Get RAG system status"""
+    try:
+        if not rag_manager:
+            return jsonify({
+                'available': False,
+                'error': 'RAG manager not initialized',
+                'message': 'RAG系统未初始化'
+            }), 503
+        
+        status = rag_manager.get_status()
+        return jsonify(status), 200 if status['available'] else 503
+        
+    except Exception as e:
+        return jsonify({
+            'available': False,
+            'error': str(e),
+            'message': 'RAG系统状态检查失败'
+        }), 500
+
 @app.route('/api/rag/documents', methods=['GET'])
 def get_documents():
     """Get list of loaded documents"""
     try:
         if not rag_manager:
             return jsonify({'error': 'RAG manager not available'}), 503
+        
+        if not rag_manager.is_available():
+            return jsonify({
+                'error': 'RAG system not available',
+                'details': rag_manager.initialization_error
+            }), 503
 
         documents = rag_manager.list_documents()
         stats = rag_manager.get_stats()
@@ -546,14 +620,21 @@ def add_document():
         if not rag_manager:
             return jsonify({'error': 'RAG manager not available'}), 503
 
-        data = request.get_json()
-        file_path = data.get('file_path', '').strip()
+        # 支持JSON和FormData两种格式
+        if request.is_json:
+            data = request.get_json()
+            file_path = data.get('file_path', '').strip()
+            force_reload = data.get('force_reload', False)
+        else:
+            # 处理FormData
+            file_path = request.form.get('file_path', '').strip()
+            force_reload = request.form.get('force_reload', 'false').lower() == 'true'
 
         if not file_path:
             return jsonify({'error': 'No file path provided', 'details': 'Please provide a valid file path'}), 400
 
         # 记录请求信息用于调试
-        print(f"RAG API: Attempting to add from path: '{file_path}'")
+        print(f"RAG API: Attempting to add from path: '{file_path}', force_reload: {force_reload}")
 
         # 检查路径是文件还是目录
         from pathlib import Path
@@ -572,7 +653,7 @@ def add_document():
         elif path_obj.is_dir():
             # 处理目录
             print(f"RAG API: Detected directory, using directory loading")
-            result = rag_manager.add_documents_from_directory(file_path)
+            result = rag_manager.add_documents_from_directory(file_path, force_reload=force_reload)
         else:
             return jsonify({
                 'error': f'Invalid path type: {file_path}',
@@ -770,4 +851,6 @@ def clear_all_documents():
         return jsonify({'error': f'Failed to clear documents: {str(e)}'}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5050)
+    import os
+    port = int(os.environ.get('FLASK_RUN_PORT', 5051))
+    app.run(debug=True, host='0.0.0.0', port=port)

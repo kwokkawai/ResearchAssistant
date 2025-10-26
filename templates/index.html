@@ -142,149 +142,23 @@
         </div>
 
 
-        <!-- Model Selection Section -->
-        <div class="row mt-4">
+        <!-- Agent Configuration Display Section -->
+        <div class="row mt-4" id="agentConfigSection" style="display: none;">
             <div class="col-12">
-                <div class="card">
-                    <div class="card-header">
+                <div class="card border-primary">
+                    <div class="card-header bg-primary text-white">
                         <h5 class="mb-0">
-                            <i class="fas fa-server me-2"></i>选择LLM模型
+                            <i class="fas fa-cog me-2"></i>智能体功能设置
                         </h5>
                     </div>
                     <div class="card-body">
-                        <div class="row" id="modelSelection">
-                            <!-- Model selection will be loaded here -->
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>说明：</strong>以下设置继承自智能体的模板配置。如需修改，请前往"智能体管理"→"配置管理"进行调整。
                         </div>
-                        
-                        <!-- Ollama Model Selection -->
-                        <div class="row mt-3" id="ollamaModelSection" style="display: none;">
-                            <div class="col-12">
-                                <div class="card border-info">
-                                    <div class="card-header bg-info text-white">
-                                        <h6 class="mb-0">
-                                            <i class="fas fa-desktop me-2"></i>选择Ollama模型
-                                        </h6>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="row" id="ollamaModelSelection">
-                                            <!-- Ollama models will be loaded here -->
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- OpenAI Model Selection -->
-                        <div class="row mt-3" id="openaiModelSection" style="display: none;">
-                            <div class="col-12">
-                                <div class="card border-success">
-                                    <div class="card-header bg-success text-white">
-                                        <h6 class="mb-0">
-                                            <i class="fas fa-brain me-2"></i>选择OpenAI模型
-                                        </h6>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="row" id="openaiModelSelection">
-                                            <!-- OpenAI models will be loaded here -->
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Google Gemini Model Selection -->
-                        <div class="row mt-3" id="geminiModelSection" style="display: none;">
-                            <div class="col-12">
-                                <div class="card border-warning">
-                                    <div class="card-header bg-warning text-dark">
-                                        <h6 class="mb-0">
-                                            <i class="fas fa-gem me-2"></i>选择Google Gemini模型
-                                        </h6>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="row" id="geminiModelSelection">
-                                            <!-- Google Gemini models will be loaded here -->
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Deep Research Options Section -->
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-search me-2"></i>深度研究选项
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="enableDeepResearch" checked>
-                                    <label class="form-check-label" for="enableDeepResearch">
-                                        <i class="fas fa-microscope me-1"></i>启用深度研究
-                                    </label>
-                                    <small class="form-text text-muted">使用多轮分析和综合推理</small>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="enableWebSearch">
-                                    <label class="form-check-label" for="enableWebSearch">
-                                        <i class="fas fa-globe me-1"></i>启用网络搜索
-                                    </label>
-                                    <small class="form-text text-muted">搜索最新信息和实时数据</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row mt-3" id="webSearchOptions" style="display: none;">
-                            <div class="col-12">
-                                <div class="card border-info">
-                                    <div class="card-header bg-info text-white">
-                                        <h6 class="mb-0">
-                                            <i class="fas fa-cog me-2"></i>网络搜索设置
-                                        </h6>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <label for="searchEngine" class="form-label">搜索引擎</label>
-                                                <select class="form-select" id="searchEngine">
-                                                    <option value="google">Google</option>
-                                                    <option value="bing">Bing</option>
-                                                    <option value="duckduckgo">DuckDuckGo</option>
-                                                </select>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label for="searchResults" class="form-label">搜索结果数量</label>
-                                                <select class="form-select" id="searchResults">
-                                                    <option value="5">5个结果</option>
-                                                    <option value="10" selected>10个结果</option>
-                                                    <option value="15">15个结果</option>
-                                                    <option value="20">20个结果</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="row mt-2">
-                                            <div class="col-12">
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" id="includeImages" checked>
-                                                    <label class="form-check-label" for="includeImages">
-                                                        <i class="fas fa-image me-1"></i>包含图片搜索
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                        <div id="agentConfigDisplay">
+                            <!-- Agent configuration will be displayed here -->
                         </div>
                     </div>
                 </div>
@@ -624,17 +498,82 @@
                             <strong>重要提醒：</strong>修改此配置将影响所有使用该模板的智能体。
                         </div>
 
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="modalTemplateDefaultModel" class="form-label">默认模型</label>
-                                    <select class="form-select" id="modalTemplateDefaultModel">
-                                        <option value="openai">OpenAI</option>
-                                        <option value="gemini">Google Gemini</option>
-                                        <option value="ollama">Ollama (本地)</option>
-                                    </select>
+                        <!-- LLM 模型配置区域 -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-primary text-white">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-brain me-2"></i>LLM 模型配置
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="modalTemplateDefaultModel" class="form-label">
+                                                <i class="fas fa-server me-1"></i>默认模型类型 <span class="text-danger">*</span>
+                                            </label>
+                                            <select class="form-select" id="modalTemplateDefaultModel">
+                                                <option value="openai">OpenAI</option>
+                                                <option value="gemini">Google Gemini</option>
+                                                <option value="ollama">Ollama (本地)</option>
+                                            </select>
+                                            <small class="form-text text-muted">选择要使用的LLM提供商</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6" id="templateModelSpecific">
+                                        <!-- 根据选择的模型类型显示对应的模型选择器 -->
+                                        
+                                        <!-- OpenAI 模型选择 -->
+                                        <div class="mb-3" id="templateOpenAIModelSection" style="display:none;">
+                                            <label for="modalTemplateOpenAIModel" class="form-label">
+                                                <i class="fas fa-robot me-1"></i>OpenAI 模型名称 <span class="text-danger">*</span>
+                                            </label>
+                                            <input type="text" class="form-control" id="modalTemplateOpenAIModel" 
+                                                   placeholder="例如: gpt-4o, gpt-4o-mini, gpt-4-turbo, gpt-3.5-turbo">
+                                            <small class="form-text text-muted">
+                                                输入OpenAI模型名称（常用: gpt-4o, gpt-4o-mini, gpt-4-turbo, gpt-3.5-turbo）
+                                            </small>
+                                        </div>
+
+                                        <!-- Gemini 模型选择 -->
+                                        <div class="mb-3" id="templateGeminiModelSection" style="display:none;">
+                                            <label for="modalTemplateGeminiModel" class="form-label">
+                                                <i class="fas fa-gem me-1"></i>Gemini 模型名称 <span class="text-danger">*</span>
+                                            </label>
+                                            <input type="text" class="form-control" id="modalTemplateGeminiModel" 
+                                                   placeholder="例如: gemini-1.5-pro, gemini-1.5-flash, gemini-pro">
+                                            <small class="form-text text-muted">
+                                                输入Gemini模型名称（常用: gemini-1.5-pro, gemini-1.5-flash, gemini-pro）
+                                            </small>
+                                        </div>
+
+                                        <!-- Ollama 模型选择 -->
+                                        <div class="mb-3" id="templateOllamaModelSection" style="display:none;">
+                                            <label for="modalTemplateOllamaModel" class="form-label">
+                                                <i class="fas fa-laptop me-1"></i>Ollama 本地模型 <span class="text-danger">*</span>
+                                            </label>
+                                            <div class="input-group">
+                                                <select class="form-select" id="modalTemplateOllamaModel">
+                                                    <option value="">-- 加载中... --</option>
+                                                </select>
+                                                <button class="btn btn-outline-secondary" type="button" id="refreshOllamaModelsBtn">
+                                                    <i class="fas fa-sync-alt"></i> 刷新
+                                                </button>
+                                            </div>
+                                            <small class="form-text text-muted">
+                                                <span class="text-info"><i class="fas fa-info-circle"></i> 从本地Ollama加载可用模型</span>
+                                                <br>
+                                                <span class="text-warning">⚠️ 必须选择一个本地Ollama模型</span>
+                                            </small>
+                                            <div id="ollamaModelsStatus" class="mt-2"></div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
+                        </div>
+
+                        <!-- 其他配置 -->
+                        <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="modalTemplateTemperature" class="form-label">温度 (Temperature)</label>
@@ -642,14 +581,14 @@
                                     <small class="form-text text-muted">当前值: <span id="modalTemplateTemperatureValue">0.7</span></small>
                                 </div>
                             </div>
-                        </div>
-                        <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="modalTemplateMaxTokens" class="form-label">最大令牌数</label>
-                                    <input type="number" class="form-control" id="modalTemplateMaxTokens" min="100" max="4000" value="2000">
+                                    <input type="number" class="form-control" id="modalTemplateMaxTokens" min="100" max="10000" value="2000">
                                 </div>
                             </div>
+                        </div>
+                        <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="modalTemplateTimeout" class="form-label">超时时间 (秒)</label>
@@ -666,20 +605,135 @@
                                     </label>
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-8">
+                                <div class="card border-warning">
+                                    <div class="card-header bg-warning text-dark">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-database me-2"></i>
+                                            数据源配置 (二选一)
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="alert alert-info">
+                                            <small>
+                                                <i class="fas fa-info-circle me-1"></i>
+                                                <strong>重要：</strong>请选择唯一的数据源类型。启用本地文档RAG时必须配置文档路径。
+                                            </small>
+                                        </div>
+
+                                        <!-- 数据源选择单选按钮 -->
+                                        <div class="row mb-3">
+                            <div class="col-md-6">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="modalTemplateWebSearch" checked>
-                                    <label class="form-check-label" for="modalTemplateWebSearch">
-                                        启用网络搜索
+                                                    <input class="form-check-input" type="radio" name="templateDataSource"
+                                                           id="modalTemplateDataSourceWeb" value="web_search" checked>
+                                                    <label class="form-check-label" for="modalTemplateDataSourceWeb">
+                                                        <i class="fas fa-globe text-primary me-2"></i>
+                                                        <strong>网络搜索</strong>
                                     </label>
+                                                    <small class="form-text text-muted d-block">
+                                                        从互联网实时获取信息，支持最新数据
+                                                    </small>
                                 </div>
                             </div>
-                            <div class="col-md-4">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="modalTemplateRAG">
-                                    <label class="form-check-label" for="modalTemplateRAG">
-                                        启用本地文档RAG
-                                    </label>
+                                            <div class="col-md-6">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="templateDataSource"
+                                                           id="modalTemplateDataSourceRAG" value="rag">
+                                                    <label class="form-check-label" for="modalTemplateDataSourceRAG">
+                                                        <i class="fas fa-file-alt text-success me-2"></i>
+                                                        <strong>本地文档RAG</strong>
+                                                    </label>
+                                                    <small class="form-text text-muted d-block">
+                                                        基于本地文档提供精确回答，文档路径必填
+                                                    </small>
+                        </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- 当前选择状态显示 -->
+                                        <div id="templateDataSourceStatus" class="alert alert-light border">
+                                            <small id="templateDataSourceStatusText">
+                                                <i class="fas fa-globe text-primary me-1"></i>
+                                                当前选择：网络搜索 - 将从互联网获取信息
+                                            </small>
+                                        </div>
+
+                                        <!-- 本地文档RAG配置区域 -->
+                                        <div id="templateRAGConfigSection" class="mt-3" style="display: none;">
+                                            <div class="card border-success">
+                                                <div class="card-header bg-success text-white">
+                                                    <h6 class="mb-0">
+                                                        <i class="fas fa-file-alt me-2"></i>本地文档配置
+                                                    </h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="alert alert-info">
+                                                        <h6><i class="fas fa-info-circle me-2"></i>重要说明</h6>
+                                                        <ul class="mb-0">
+                                                            <li>启用本地文档RAG后，智能体将<strong>100%基于配置的文档内容</strong>回答问题</li>
+                                                            <li>不会使用网络搜索或任何外部知识</li>
+                                                            <li>必须配置至少一个文档路径</li>
+                                                        </ul>
+                                                    </div>
+
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <label for="templateRAGTopK" class="form-label">检索文档数量</label>
+                                                            <input type="number" class="form-control" id="templateRAGTopK" min="1" max="10" value="5">
+                                                            <small class="form-text text-muted">每次查询检索的相关文档片段数量</small>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label for="templateRAGContextWindow" class="form-label">上下文窗口</label>
+                                                            <input type="number" class="form-control" id="templateRAGContextWindow" min="1" max="5" value="2">
+                                                            <small class="form-text text-muted">包含前后相关段落的数量</small>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="mt-3">
+                                                        <label class="form-label">文档和档案配置</label>
+                                                        <textarea class="form-control" id="templateRAGDocumentLinks" rows="4"
+                                                            placeholder="输入文档路径，每行一个：&#10;/Users/username/Documents/tech.pdf&#10;/Users/username/Documents/project/&#10;/Users/username/Documents/*.md"></textarea>
+                                                        <small class="form-text text-muted">
+                                                            <strong>支持的文件格式：</strong>PDF (.pdf), Word (.docx, .doc), Markdown (.md), 文本 (.txt), JSON (.json), HTML (.html)<br>
+                                                            <strong>路径格式：</strong><br>
+                                                            • 单个文件：/path/to/document.pdf<br>
+                                                            • 整个文件夹：/path/to/folder/<br>
+                                                            • 模式匹配：/path/to/folder/*.md
+                                                        </small>
+                                                    </div>
+
+                                                    <div class="mt-3">
+                                                        <div class="form-check mb-2">
+                                                            <input class="form-check-input" type="checkbox" id="templateForceReloadRAG">
+                                                            <label class="form-check-label" for="templateForceReloadRAG">
+                                                                强制重新加载文档
+                                                            </label>
+                                                            <small class="form-text text-muted d-block">
+                                                                勾选后将清除现有文档并重新加载所有配置的文档
+                                                            </small>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="mt-3">
+                                                        <div class="card border-light bg-light">
+                                                            <div class="card-body">
+                                                                <div class="d-flex gap-2 mb-2">
+                                                                    <button type="button" class="btn btn-outline-primary btn-sm" id="testTemplateRAGDocumentsBtnModal">
+                                                                        <i class="fas fa-search me-2"></i>测试文档加载
+                                                                    </button>
+                                                                    <button type="button" class="btn btn-outline-warning btn-sm" id="clearTemplateRAGDocumentsBtnModal">
+                                                                        <i class="fas fa-trash me-2"></i>清除所有文档
+                                                                    </button>
+                                                                </div>
+                                                                <span id="templateRAGTestResult" class="text-muted d-block"></span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -727,7 +781,7 @@
                                         <h6 class="mb-0">
                                             <i class="fas fa-file-alt me-2"></i>本地文档RAG配置
                                         </h6>
-                                    </div>
+                    </div>
                                     <div class="card-body">
                                         <div class="alert alert-warning">
                                             <i class="fas fa-exclamation-triangle me-2"></i>
@@ -762,14 +816,35 @@
                                                 </label>
                                             </div>
                                             <div class="d-flex gap-2">
-                                                <button type="button" class="btn btn-outline-primary btn-sm" id="testTemplateRAGDocumentsBtn">
+                                                <button type="button" class="btn btn-outline-primary btn-sm" id="testTemplateRAGDocumentsBtnModal">
                                                     <i class="fas fa-search me-2"></i>测试文档加载
-                                                </button>
-                                                <button type="button" class="btn btn-outline-warning btn-sm" id="clearTemplateRAGDocumentsBtn">
+                        </button>
+                                                <button type="button" class="btn btn-outline-warning btn-sm" id="clearTemplateRAGDocumentsBtnModal">
                                                     <i class="fas fa-trash me-2"></i>清除所有文档
                                                 </button>
                                             </div>
                                             <span id="templateRAGTestResult" class="ms-2 text-muted d-block mt-2"></span>
+                                            
+                                            <!-- 调试信息显示区域 -->
+                                            <div id="templateRAGDebugInfo" class="mt-3" style="display: none;">
+                                                <div class="card border-info">
+                                                    <div class="card-header bg-info text-white">
+                                                        <h6 class="mb-0">
+                                                            <i class="fas fa-bug me-2"></i>调试信息
+                                                            <button type="button" class="btn btn-sm btn-outline-light float-end" onclick="toggleDebugInfo()">
+                                                                <i class="fas fa-eye" id="debugToggleIcon"></i>
+                                                            </button>
+                                                        </h6>
+                                                    </div>
+                                                    <div class="card-body" id="debugInfoContent" style="display: none;">
+                                                        <div id="debugLog" style="height: 200px; overflow-y: auto; background: #f8f9fa; padding: 10px; border-radius: 5px; font-family: monospace; font-size: 12px;"></div>
+                                                        <div class="mt-2">
+                                                            <button type="button" class="btn btn-sm btn-outline-info" onclick="clearDebugLog()">清除日志</button>
+                                                            <button type="button" class="btn btn-sm btn-outline-success" onclick="copyDebugLog()">复制日志</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -781,6 +856,101 @@
                             <i class="fas fa-save me-2"></i>保存配置
                         </button>
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 专门的本地文档RAG配置模态框 -->
+        <div class="modal fade" id="ragConfigModal" tabindex="-1" aria-labelledby="ragConfigModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title" id="ragConfigModalLabel">
+                            <i class="fas fa-file-alt me-2"></i>本地文档RAG配置
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="关闭"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-info">
+                            <h6><i class="fas fa-info-circle me-2"></i>重要说明</h6>
+                            <ul class="mb-0">
+                                <li>启用本地文档RAG后，智能体将<strong>100%基于配置的文档内容</strong>回答问题</li>
+                                <li>不会使用网络搜索或任何外部知识</li>
+                                <li>必须配置至少一个文档路径</li>
+                                <li>支持PDF、Word、Markdown、文本、JSON、HTML等格式</li>
+                            </ul>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="ragTopK" class="form-label">检索文档数量</label>
+                                <input type="number" class="form-control" id="ragTopK" min="1" max="10" value="5">
+                                <small class="form-text text-muted">每次查询检索的相关文档片段数量</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="ragContextWindow" class="form-label">上下文窗口</label>
+                                <input type="number" class="form-control" id="ragContextWindow" min="1" max="5" value="2">
+                                <small class="form-text text-muted">包含前后相关段落的数量</small>
+                            </div>
+                        </div>
+
+                        <div class="mt-3">
+                            <label class="form-label">文档和档案配置</label>
+                            <textarea class="form-control" id="ragDocumentLinks" rows="6"
+                                placeholder="输入文档路径，每行一个：&#10;/Users/username/Documents/tech.pdf&#10;/Users/username/Documents/project/&#10;/Users/username/Documents/*.md"></textarea>
+                            <small class="form-text text-muted">
+                                <strong>支持的文件格式：</strong>PDF (.pdf), Word (.docx, .doc), Markdown (.md), 文本 (.txt), JSON (.json), HTML (.html)<br>
+                                <strong>路径格式：</strong><br>
+                                • 单个文件：/path/to/document.pdf<br>
+                                • 整个文件夹：/path/to/folder/<br>
+                                • 模式匹配：/path/to/folder/*.md
+                            </small>
+                        </div>
+
+                        <div class="mt-3">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="forceReloadRAG">
+                                <label class="form-check-label" for="forceReloadRAG">
+                                    强制重新加载文档
+                                </label>
+                                <small class="form-text text-muted d-block">
+                                    勾选后将清除现有文档并重新加载所有配置的文档
+                                </small>
+                            </div>
+                        </div>
+
+                        <div class="mt-3">
+                            <div class="card border-light bg-light">
+                                <div class="card-header">
+                                    <h6 class="mb-0"><i class="fas fa-vial me-2"></i>文档测试</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-flex gap-2 mb-2">
+                                        <button type="button" class="btn btn-outline-primary btn-sm" id="testRAGDocumentsBtn">
+                                            <i class="fas fa-search me-2"></i>测试文档加载
+                                        </button>
+                                        <button type="button" class="btn btn-outline-warning btn-sm" id="clearRAGDocumentsBtn">
+                                            <i class="fas fa-trash me-2"></i>清除所有文档
+                                        </button>
+                                    </div>
+                                    <span id="ragTestResult" class="text-muted d-block"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-3">
+                            <div class="alert alert-success">
+                                <h6><i class="fas fa-shield-alt me-2"></i>数据安全保证</h6>
+                                <p class="mb-0">所有文档处理都在本地进行，不会上传到任何外部服务器。查询结果将严格基于您配置的文档内容生成。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-success" id="saveRAGConfigBtn">
+                            <i class="fas fa-save me-2"></i>保存RAG配置
+                        </button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
                     </div>
                 </div>
             </div>
@@ -804,6 +974,9 @@
             }
 
             async init() {
+                // Check RAG system status first
+                await this.checkRAGStatus();
+                
                 await this.loadAgents();
                 await this.loadModels();
                 await this.loadOllamaModels();
@@ -812,6 +985,46 @@
                 // Set initial displays
                 document.getElementById('selectedModelDisplay').textContent = this.getModelDisplayName(this.selectedModel);
                 this.updateSelectedAgentsDisplay();
+            }
+            
+            async checkRAGStatus() {
+                try {
+                    const apiUrl = await this.detectAPIEndpoint();
+                    const response = await fetch(`${apiUrl}/api/rag/status`);
+                    const status = await response.json();
+                    
+                    if (!status.available) {
+                        console.warn('⚠️ RAG系统不可用:', status.error);
+                        
+                        // Show warning to user
+                        const warningDiv = document.createElement('div');
+                        warningDiv.className = 'alert alert-warning alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3';
+                        warningDiv.style.zIndex = '9999';
+                        warningDiv.style.maxWidth = '600px';
+                        warningDiv.innerHTML = `
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            <h6><i class="fas fa-exclamation-triangle me-2"></i>RAG功能不可用</h6>
+                            <p class="mb-0">${status.message || 'RAG系统初始化失败，无法加载文档。'}</p>
+                            <small class="d-block mt-2">
+                                <strong>可能原因：</strong><br>
+                                1. 首次运行需要联网下载AI模型<br>
+                                2. 网络连接问题<br>
+                                <strong>解决方法：</strong>连接网络后重启应用
+                            </small>
+                        `;
+                        document.body.appendChild(warningDiv);
+                        
+                        // Auto dismiss after 10 seconds
+                        setTimeout(() => {
+                            warningDiv.classList.remove('show');
+                            setTimeout(() => warningDiv.remove(), 150);
+                        }, 10000);
+                    } else {
+                        console.log('✅ RAG系统运行正常');
+                    }
+                } catch (error) {
+                    console.error('❌ 无法检查RAG状态:', error);
+                }
             }
 
             async loadAgents() {
@@ -1069,6 +1282,14 @@
                 };
                 return names[modelName] || modelName;
             }
+            
+            escapeHtml(text) {
+                // 转义HTML特殊字符以防止XSS攻击
+                if (!text) return '';
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
 
             selectModel(modelName, modelCard) {
                 // Remove selection from all model cards
@@ -1174,8 +1395,8 @@
 
                 console.log(`Selected agent: ${agentId}`);
 
-                // Load default settings from agent template config
-                this.loadAgentDefaults(agentId);
+                // Load and display agent configuration
+                this.loadAndDisplayAgentConfig(agentId);
 
                 // Update selected agents display
                 this.updateSelectedAgentsDisplay();
@@ -1192,49 +1413,162 @@
                     radio.checked = false;
                 });
                 this.selectedAgents = [];
+                
+                // Hide configuration section
+                document.getElementById('agentConfigSection').style.display = 'none';
             }
 
-            async loadAgentDefaults(agentId) {
-                // Load default deep research settings from agent template config
+            async loadAndDisplayAgentConfig(agentId) {
                 try {
-                    const response = await fetch(`/api/agents/${agentId}/defaults`);
-                    const data = await response.json();
-
-                    if (data.defaults) {
-                        // Apply defaults to UI controls
-                        const defaults = data.defaults;
-
-                        // Update checkboxes
-                        const enableDeepResearch = document.getElementById('enableDeepResearch');
-                        const enableWebSearch = document.getElementById('enableWebSearch');
-
-                        if (enableDeepResearch) enableDeepResearch.checked = defaults.enableDeepResearch;
-                        if (enableWebSearch) enableWebSearch.checked = defaults.enableWebSearch;
-
-                        // Update search engine
-                        const searchEngine = document.getElementById('searchEngine');
-                        if (searchEngine) {
-                            searchEngine.value = defaults.searchEngine;
-                        }
-
-                        // Update search results count
-                        const searchResults = document.getElementById('searchResults');
-                        if (searchResults) {
-                            searchResults.value = defaults.searchResults;
-                        }
-
-                        // Update include images
-                        const includeImages = document.getElementById('includeImages');
-                        if (includeImages) includeImages.checked = defaults.includeImages;
-
-                        // Update web search options visibility
-                        this.toggleWebSearchOptions(defaults.enableWebSearch);
-
-                        console.log(`Loaded defaults for agent ${agentId}:`, defaults);
+                    // Get agent details including template configuration
+                    const response = await fetch(`/api/agents/${agentId}`);
+                    const agentData = await response.json();
+                    
+                    console.log('Agent API response:', agentData);
+                    
+                    const agent = agentData.agent || agentData;
+                    
+                    if (!agent || !agent.template_id) {
+                        console.error('Agent or template_id not found', agent);
+                        return;
                     }
+                    
+                    // Get template configuration
+                    const templateResponse = await fetch(`/api/templates/${agent.template_id}`);
+                    const templateData = await templateResponse.json();
+                    
+                    console.log('Template API response:', templateData);
+                    
+                    const template = templateData.template || templateData;
+                    
+                    if (!template || !template.config) {
+                        console.error('Template or config not found', template);
+                        return;
+                    }
+                    
+                    const config = template.config;
+                    console.log('Agent configuration:', config);
+                    
+                    // Display configuration
+                    this.displayAgentConfig(agent, template, config);
+                    
+                    // Show configuration section
+                    document.getElementById('agentConfigSection').style.display = 'block';
+                    
                 } catch (error) {
-                    console.error('Failed to load agent defaults:', error);
+                    console.error('Failed to load agent configuration:', error);
+                    document.getElementById('agentConfigSection').style.display = 'none';
                 }
+            }
+            
+            displayAgentConfig(agent, template, config) {
+                const displayDiv = document.getElementById('agentConfigDisplay');
+                
+                // Update model display in header
+                const modelDisplay = document.getElementById('selectedModelDisplay');
+                if (modelDisplay) {
+                    modelDisplay.textContent = config.model || '未设置';
+                }
+                
+                let html = `
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100 border-info">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0"><i class="fas fa-robot me-2"></i>智能体信息</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>名称:</strong> ${agent.name}</p>
+                                    <p><strong>描述:</strong> ${agent.description}</p>
+                                    <p><strong>使用模板:</strong> ${template.name}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100 border-success">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0"><i class="fas fa-brain me-2"></i>LLM模型设置</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>模型:</strong> ${config.model || '未设置'}</p>
+                                    <p><strong>温度:</strong> ${config.temperature !== undefined ? config.temperature : 0.7}</p>
+                                    <p><strong>最大令牌:</strong> ${config.max_tokens || '默认'}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100 ${config.deep_research_enabled ? 'border-primary' : 'border-secondary'}">
+                                <div class="card-header ${config.deep_research_enabled ? 'bg-primary text-white' : 'bg-light'}">
+                                    <h6 class="mb-0"><i class="fas fa-microscope me-2"></i>深度研究</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p class="mb-2">
+                                        <span class="badge ${config.deep_research_enabled ? 'bg-success' : 'bg-secondary'}">
+                                            ${config.deep_research_enabled ? '✓ 已启用' : '✗ 未启用'}
+                                        </span>
+                                    </p>
+                                    ${config.deep_research_enabled && config.deep_research ? `
+                                        <small>
+                                            <strong>最大深度:</strong> ${config.deep_research.max_depth || 3}<br>
+                                            <strong>每层查询:</strong> ${config.deep_research.questions_per_level || 2}<br>
+                                            <strong>详细程度:</strong> ${config.deep_research.detail_level || '中等'}
+                                        </small>
+                                    ` : '<small class="text-muted">使用标准研究模式</small>'}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100 ${config.web_search_enabled ? 'border-info' : 'border-secondary'}">
+                                <div class="card-header ${config.web_search_enabled ? 'bg-info text-white' : 'bg-light'}">
+                                    <h6 class="mb-0"><i class="fas fa-globe me-2"></i>网络搜索</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p class="mb-2">
+                                        <span class="badge ${config.web_search_enabled ? 'bg-success' : 'bg-secondary'}">
+                                            ${config.web_search_enabled ? '✓ 已启用' : '✗ 未启用'}
+                                        </span>
+                                    </p>
+                                    ${config.web_search_enabled ? `
+                                        <small>
+                                            <strong>搜索引擎:</strong> ${this.getSearchEngineName(config.search_engine || 'duckduckgo')}<br>
+                                            <strong>结果数:</strong> ${config.search_results_count || 10}<br>
+                                            <strong>包含图片:</strong> ${config.include_images ? '是' : '否'}
+                                        </small>
+                                    ` : '<small class="text-muted">不使用网络搜索</small>'}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100 ${config.rag_enabled ? 'border-warning' : 'border-secondary'}">
+                                <div class="card-header ${config.rag_enabled ? 'bg-warning text-dark' : 'bg-light'}">
+                                    <h6 class="mb-0"><i class="fas fa-file-alt me-2"></i>本地文档RAG</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p class="mb-2">
+                                        <span class="badge ${config.rag_enabled ? 'bg-success' : 'bg-secondary'}">
+                                            ${config.rag_enabled ? '✓ 已启用' : '✗ 未启用'}
+                                        </span>
+                                    </p>
+                                    ${config.rag_enabled && config.rag ? `
+                                        <small>
+                                            <strong>检索文档数:</strong> ${config.rag.top_k || 5}<br>
+                                            <strong>上下文窗口:</strong> ${config.rag.context_window || 2}<br>
+                                            <strong>文档路径:</strong> ${config.rag.document_links ? config.rag.document_links.length + ' 个' : '未配置'}
+                                        </small>
+                                    ` : '<small class="text-muted">不使用本地文档</small>'}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                displayDiv.innerHTML = html;
             }
 
             updateSelectedAgentsDisplay() {
@@ -1275,14 +1609,22 @@
                 });
 
                 // Deep research functionality
-                document.getElementById('enableWebSearch').addEventListener('change', (e) => {
-                    this.toggleWebSearchOptions(e.target.checked);
-                });
+                // 注意: enableWebSearch 元素已删除，深度研究选项现在在模板配置中
+                // 保留 toggleWebSearchOptions 方法以防其他地方使用
+                const enableWebSearchEl = document.getElementById('enableWebSearch');
+                if (enableWebSearchEl) {
+                    enableWebSearchEl.addEventListener('change', (e) => {
+                        this.toggleWebSearchOptions(e.target.checked);
+                    });
+                }
 
                 // Agent management functionality
-                document.getElementById('agentManagementBtn').addEventListener('click', () => {
-                    this.showAgentManagement();
-                });
+                const agentMgmtBtn = document.getElementById('agentManagementBtn');
+                if (agentMgmtBtn) {
+                    agentMgmtBtn.addEventListener('click', () => {
+                        this.showAgentManagement();
+                    });
+                }
 
                 document.getElementById('addAgentBtn').addEventListener('click', () => {
                     this.showAgentEditModal();
@@ -1335,42 +1677,42 @@
                     this.clearRAGDocuments();
                 });
 
-                // Template config modal functionality
-                document.getElementById('modalTemplateWebSearch').addEventListener('change', (e) => {
-                    this.toggleModalTemplateWebSearchConfig(e.target.checked);
-                });
-
-                document.getElementById('modalTemplateRAG').addEventListener('change', (e) => {
-                    this.toggleModalTemplateRAGConfig(e.target.checked);
-                    // 如果启用RAG，自动禁用网络搜索
-                    if (e.target.checked) {
-                        document.getElementById('modalTemplateWebSearch').checked = false;
-                        this.toggleModalTemplateWebSearchConfig(false);
-                    }
-                });
-
-                // 网络搜索启用时自动禁用RAG
-                document.getElementById('modalTemplateWebSearch').addEventListener('change', (e) => {
-                    if (e.target.checked) {
-                        document.getElementById('modalTemplateRAG').checked = false;
-                        this.toggleModalTemplateRAGConfig(false);
-                    }
+                // Template config modal functionality - Data source radio buttons
+                document.querySelectorAll('input[name="templateDataSource"]').forEach(radio => {
+                    radio.addEventListener('change', (e) => {
+                        this.handleTemplateDataSourceChange();
+                    });
                 });
 
                 document.getElementById('modalTemplateTemperature').addEventListener('input', (e) => {
                     document.getElementById('modalTemplateTemperatureValue').textContent = e.target.value;
                 });
 
+                // Model type change event
+                document.getElementById('modalTemplateDefaultModel').addEventListener('change', (e) => {
+                    this.handleTemplateModelTypeChange(e.target.value);
+                });
+
+                // Refresh Ollama models button
+                const refreshOllamaBtn = document.getElementById('refreshOllamaModelsBtn');
+                if (refreshOllamaBtn) {
+                    refreshOllamaBtn.addEventListener('click', () => {
+                        const currentSelected = document.getElementById('modalTemplateOllamaModel').value;
+                        this.loadOllamaModelsForTemplate(currentSelected);
+                    });
+                }
+
                 document.getElementById('saveTemplateConfigModal').addEventListener('click', () => {
+                    console.log('🔘 保存配置按钮点击事件触发');
                     this.saveTemplateConfigModal();
                 });
 
-                document.getElementById('testTemplateRAGDocumentsBtn').addEventListener('click', () => {
-                    this.testTemplateRAGDocuments();
-                });
+                // RAG buttons are now bound in modal shown event
+                // See editTemplateConfig method for event binding
 
-                document.getElementById('clearTemplateRAGDocumentsBtn').addEventListener('click', () => {
-                    this.clearTemplateRAGDocuments();
+                // RAG configuration modal events
+                document.getElementById('saveRAGConfigBtn').addEventListener('click', () => {
+                    this.saveRAGConfig();
                 });
 
                 // Load templates list when templates tab is shown
@@ -1446,37 +1788,6 @@
                 const container = document.getElementById('researchResults');
                 container.innerHTML = '';
 
-                // Display web search results if available
-                if (results.web_search_results && results.web_search_results.length > 0) {
-                    const searchCard = document.createElement('div');
-                    searchCard.className = 'card mb-4 border-info';
-                    searchCard.innerHTML = `
-                        <div class="card-header bg-info text-white">
-                            <h6 class="mb-0"><i class="fas fa-globe me-2"></i>网络搜索结果</h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                ${results.web_search_results.map(result => `
-                                    <div class="col-md-6 mb-3">
-                                        <div class="card h-100">
-                                            <div class="card-body">
-                                                <h6 class="card-title">
-                                                    <a href="${result.url}" target="_blank" class="text-decoration-none">
-                                                        ${result.title}
-                                                    </a>
-                                                </h6>
-                                                <p class="card-text small">${result.snippet}</p>
-                                                <small class="text-muted">来源: ${result.source}</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    `;
-                    container.appendChild(searchCard);
-                }
-
                 // Display summary
                 if (results.summary) {
                     const summaryCard = document.createElement('div');
@@ -1490,6 +1801,57 @@
                         </div>
                     `;
                     container.appendChild(summaryCard);
+                }
+
+                // Display web search results if available
+                console.log('🔍 [DEBUG] 检查网络搜索结果:');
+                console.log('  results 对象:', results);
+                console.log('  web_search_results 存在:', !!results.web_search_results);
+                console.log('  web_search_results 类型:', typeof results.web_search_results);
+                console.log('  web_search_results 长度:', results.web_search_results ? results.web_search_results.length : 'N/A');
+                if (results.web_search_results) {
+                    console.log('  前3个结果:', results.web_search_results.slice(0, 3));
+                }
+                
+                if (results.web_search_results && results.web_search_results.length > 0) {
+                    console.log('✅ [DEBUG] 开始渲染网络搜索结果卡片');
+                    const searchResultsCard = document.createElement('div');
+                    searchResultsCard.className = 'card mb-4';
+                    searchResultsCard.innerHTML = `
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0">
+                                <i class="fas fa-globe me-2"></i>网络搜索结果 (${results.web_search_results.length} 个)
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row row-cols-1 row-cols-md-2 g-3">
+                                ${results.web_search_results.map((item, index) => `
+                                    <div class="col">
+                                        <div class="card h-100 border-info">
+                                            <div class="card-body">
+                                                <h6 class="card-title">
+                                                    <span class="badge bg-info me-2">${index + 1}</span>
+                                                    ${this.escapeHtml(item.title || '无标题')}
+                                                </h6>
+                                                <p class="card-text text-muted small mb-2">
+                                                    ${this.escapeHtml(item.snippet || item.description || '无描述')}
+                                                </p>
+                                                ${item.url || item.link ? `
+                                                    <a href="${this.escapeHtml(item.url || item.link)}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-info">
+                                                        <i class="fas fa-external-link-alt me-1"></i>访问链接
+                                                    </a>
+                                                ` : ''}
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(searchResultsCard);
+                    console.log('✅ [DEBUG] 网络搜索结果卡片已添加到页面');
+                } else {
+                    console.log('⚠️  [DEBUG] 不显示网络搜索结果（无数据或长度为0）');
                 }
 
                 // Display individual agent results
@@ -1786,6 +2148,57 @@
                     container.appendChild(summaryCard);
                 }
 
+                // Display web search results if available
+                console.log('🔍 [DEBUG] 检查网络搜索结果:');
+                console.log('  results 对象:', results);
+                console.log('  web_search_results 存在:', !!results.web_search_results);
+                console.log('  web_search_results 类型:', typeof results.web_search_results);
+                console.log('  web_search_results 长度:', results.web_search_results ? results.web_search_results.length : 'N/A');
+                if (results.web_search_results) {
+                    console.log('  前3个结果:', results.web_search_results.slice(0, 3));
+                }
+                
+                if (results.web_search_results && results.web_search_results.length > 0) {
+                    console.log('✅ [DEBUG] 开始渲染网络搜索结果卡片');
+                    const searchResultsCard = document.createElement('div');
+                    searchResultsCard.className = 'card mb-4';
+                    searchResultsCard.innerHTML = `
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0">
+                                <i class="fas fa-globe me-2"></i>网络搜索结果 (${results.web_search_results.length} 个)
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row row-cols-1 row-cols-md-2 g-3">
+                                ${results.web_search_results.map((item, index) => `
+                                    <div class="col">
+                                        <div class="card h-100 border-info">
+                                            <div class="card-body">
+                                                <h6 class="card-title">
+                                                    <span class="badge bg-info me-2">${index + 1}</span>
+                                                    ${this.escapeHtml(item.title || '无标题')}
+                                                </h6>
+                                                <p class="card-text text-muted small mb-2">
+                                                    ${this.escapeHtml(item.snippet || item.description || '无描述')}
+                                                </p>
+                                                ${item.url || item.link ? `
+                                                    <a href="${this.escapeHtml(item.url || item.link)}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-info">
+                                                        <i class="fas fa-external-link-alt me-1"></i>访问链接
+                                                    </a>
+                                                ` : ''}
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(searchResultsCard);
+                    console.log('✅ [DEBUG] 网络搜索结果卡片已添加到页面');
+                } else {
+                    console.log('⚠️  [DEBUG] 不显示网络搜索结果（无数据或长度为0）');
+                }
+
                 // Display individual agent results
                 results.results.forEach(result => {
                     const resultCard = document.createElement('div');
@@ -1822,14 +2235,23 @@
                 webSearchOptions.style.display = enabled ? 'block' : 'none';
             }
 
-            getDeepResearchOptions() {
-                return {
-                    enableDeepResearch: document.getElementById('enableDeepResearch').checked,
-                    enableWebSearch: document.getElementById('enableWebSearch').checked,
-                    searchEngine: document.getElementById('searchEngine').value,
-                    searchResults: parseInt(document.getElementById('searchResults').value),
-                    includeImages: document.getElementById('includeImages').checked
+            getSearchEngineName(engine) {
+                // 转换搜索引擎代码为显示名称
+                const engineNames = {
+                    'duckduckgo': 'DuckDuckGo',
+                    'google': 'Google',
+                    'bing': 'Bing',
+                    'baidu': '百度'
                 };
+                return engineNames[engine] || engine;
+            }
+            
+            getDeepResearchOptions() {
+                // 深度研究选项现在从智能体的模板配置中获取
+                // 返回空对象，让后端完全从模板配置读取
+                // 不传递 enableWebSearch 等参数，避免覆盖模板配置
+                console.log('📋 [DEBUG] getDeepResearchOptions: 返回空对象，使用模板配置');
+                return {};
             }
 
             // Agent Management Methods
@@ -1859,7 +2281,7 @@
                 try {
                     const response = await fetch('/api/templates');
                     const data = await response.json();
-
+                    
                     if (data.success) {
                         this.renderTemplatesConfigList(data.templates);
                     } else {
@@ -2109,7 +2531,7 @@
 
                     const response = await fetch(`/api/agents/${agentId}`);
                     const data = await response.json();
-
+                    
                     if (data.success) {
                         const agent = data.agent;
                         document.getElementById('agentId').value = agent.agent_id;
@@ -2151,14 +2573,14 @@
                 try {
                     const response = await fetch(`/api/templates/${templateId}`);
                     const data = await response.json();
-
+                    
                     if (data.success) {
                         const template = data.template;
                         document.getElementById('templateId').value = template.template_id;
                         document.getElementById('templateName').value = template.name;
                         document.getElementById('templateDescription').value = template.description;
                         document.getElementById('templateEnabled').checked = template.enabled;
-
+                        
                         // Load agent selection
                         await this.loadTemplateAgentSelection(template.agents);
                     }
@@ -2175,6 +2597,145 @@
                     if (data.success) {
                         this.populateTemplateConfigModal(data.template);
                         const modal = new bootstrap.Modal(document.getElementById('templateConfigModal'));
+
+                        // Add event listener for when modal is shown
+                        const modalElement = document.getElementById('templateConfigModal');
+                        
+                        // Remove old listener if exists
+                        const oldHandler = modalElement._shownHandler;
+                        if (oldHandler) {
+                            modalElement.removeEventListener('shown.bs.modal', oldHandler);
+                        }
+                        
+                        // Create new handler
+                        const shownHandler = () => {
+                            console.log('🎬 Modal shown, setting up event listeners...');
+                            
+                            // Re-bind event listener for model type selector
+                            const modelTypeSelect = document.getElementById('modalTemplateDefaultModel');
+                            if (modelTypeSelect) {
+                                // Store current value before cloning
+                                const currentValue = modelTypeSelect.value;
+                                
+                                // Remove old listener and add new one
+                                const modelTypeHandler = (e) => {
+                                    console.log('🔄 模型类型改变:', e.target.value);
+                                    this.handleTemplateModelTypeChange(e.target.value);
+                                };
+                                
+                                // Clone to remove all listeners
+                                const newModelTypeSelect = modelTypeSelect.cloneNode(true);
+                                newModelTypeSelect.value = currentValue; // Restore value after cloning
+                                modelTypeSelect.parentNode.replaceChild(newModelTypeSelect, modelTypeSelect);
+                                
+                                // Add new listener
+                                newModelTypeSelect.addEventListener('change', modelTypeHandler);
+                                console.log('✅ 模型类型选择器事件已重新绑定, 当前值:', currentValue);
+                            }
+                            
+                            // Re-bind event listeners for radio buttons after modal is shown
+                            document.querySelectorAll('input[name="templateDataSource"]').forEach(radio => {
+                                // Remove existing listeners to avoid duplicates
+                                const changeHandler = (e) => {
+                                    console.log('Radio button changed:', e.target.value);
+                                    this.handleTemplateDataSourceChange();
+                                };
+                                radio.removeEventListener('change', changeHandler);
+                                radio.addEventListener('change', changeHandler);
+                            });
+                            
+                            // Bind event listeners for template RAG buttons
+                            const testBtn = document.getElementById('testTemplateRAGDocumentsBtnModal');
+                            const clearBtn = document.getElementById('clearTemplateRAGDocumentsBtnModal');
+                            const saveBtn = document.getElementById('saveTemplateConfigModal');
+                            
+                            console.log('🔍 Button discovery:');
+                            console.log('  Test button:', testBtn, 'Exists:', !!testBtn, 'ID:', testBtn?.id);
+                            console.log('  Clear button:', clearBtn, 'Exists:', !!clearBtn, 'ID:', clearBtn?.id);
+                            console.log('  Save button:', saveBtn, 'Exists:', !!saveBtn, 'ID:', saveBtn?.id);
+                            
+                            if (testBtn) {
+                                // Use arrow function to preserve context
+                                const testHandler = (e) => {
+                                    console.log('🔘 Test template RAG documents clicked', e);
+                                    console.log('Button element:', e.target);
+                                    console.log('researchAssistant:', typeof researchAssistant);
+                                    try {
+                                        this.testTemplateRAGDocuments();
+                                    } catch (error) {
+                                        console.error('❌ Error calling testTemplateRAGDocuments:', error);
+                                        alert('测试文档加载失败: ' + error.message);
+                                    }
+                                };
+                                
+                                // Store handler for removal
+                                testBtn._ragTestHandler = testHandler;
+                                
+                                testBtn.addEventListener('click', testHandler);
+                                console.log('✅ Test button event listener added');
+                            } else {
+                                console.error('❌ Test button not found!');
+                            }
+                            
+                            if (clearBtn) {
+                                const clearHandler = (e) => {
+                                    console.log('🗑️ Clear template RAG documents clicked', e);
+                                    console.log('Button element:', e.target);
+                                    try {
+                                        this.clearTemplateRAGDocuments();
+                                    } catch (error) {
+                                        console.error('❌ Error calling clearTemplateRAGDocuments:', error);
+                                        alert('清除文档失败: ' + error.message);
+                                    }
+                                };
+                                
+                                // Store handler for removal
+                                clearBtn._ragClearHandler = clearHandler;
+                                
+                                clearBtn.addEventListener('click', clearHandler);
+                                console.log('✅ Clear button event listener added');
+                            } else {
+                                console.error('❌ Clear button not found!');
+                            }
+                            
+                            if (saveBtn) {
+                                const saveHandler = (e) => {
+                                    console.log('💾 Save template config clicked from modal', e);
+                                    console.log('Button element:', e.target);
+                                    try {
+                                        this.saveTemplateConfigModal();
+                                    } catch (error) {
+                                        console.error('❌ Error calling saveTemplateConfigModal:', error);
+                                        alert('保存配置失败: ' + error.message);
+                                    }
+                                };
+                                
+                                // Store handler for removal
+                                saveBtn._ragSaveHandler = saveHandler;
+                                
+                                saveBtn.addEventListener('click', saveHandler);
+                                console.log('✅ Save button event listener added');
+                            } else {
+                                console.error('❌ Save button not found!');
+                            }
+                            
+                            // Check RAG config section
+                            const ragSection = document.getElementById('templateRAGConfigSection');
+                            if (ragSection) {
+                                console.log('✅ RAG config section found, display:', ragSection.style.display);
+                            } else {
+                                console.error('❌ RAG config section not found!');
+                            }
+                            
+                            console.log('🎬 Event listeners setup complete');
+                        };
+                        
+                        // Store handler for potential removal
+                        modalElement._shownHandler = shownHandler;
+                        
+                        // Add event listener (not once, so it works every time)
+                        modalElement.addEventListener('shown.bs.modal', shownHandler);
+
                         modal.show();
                     } else {
                         console.error('Failed to load template config:', data.error);
@@ -2185,69 +2746,180 @@
             }
 
             populateTemplateConfigModal(template) {
+                console.log('📝 填充模板配置模态框，模板数据:', template);
+                
                 const config = template.config || {};
+                console.log('📋 配置数据:', config);
 
                 // Store template ID for saving
-                document.getElementById('templateConfigModal').dataset.templateId = template.template_id;
+                const modal = document.getElementById('templateConfigModal');
+                modal.dataset.templateId = template.template_id;
+                console.log('✅ 模板ID已设置:', template.template_id);
 
                 // Set modal title
                 document.getElementById('templateConfigModalLabel').textContent = `编辑模板配置 - ${template.name}`;
 
                 // Populate form fields
-                document.getElementById('modalTemplateDefaultModel').value = config.default_model || 'openai';
+                const defaultModel = config.default_model || 'openai';
+                document.getElementById('modalTemplateDefaultModel').value = defaultModel;
+                
+                // Populate specific model selections
+                document.getElementById('modalTemplateOpenAIModel').value = config.preferred_openai_model || 'gpt-4o';
+                document.getElementById('modalTemplateGeminiModel').value = config.preferred_gemini_model || 'gemini-1.5-pro';
+                
+                // Store the preferred Ollama model for later loading
+                const preferredOllamaModel = config.preferred_ollama_model || '';
+                console.log('💾 保存的Ollama模型:', preferredOllamaModel);
+                
+                // Show/hide appropriate model section based on default_model
+                // Pass preferredOllamaModel to ensure it's loaded if model type is 'ollama'
+                this.handleTemplateModelTypeChange(defaultModel, preferredOllamaModel);
+                
+                // If the saved model is not 'ollama', pre-load Ollama models in background for faster switching
+                if (defaultModel !== 'ollama' && preferredOllamaModel) {
+                    console.log('📦 预加载Ollama模型（后台）');
+                    // Set the value after models are loaded (in background)
+                    this.loadOllamaModelsForTemplate(preferredOllamaModel).then(() => {
+                        console.log('✅ Ollama模型预加载完成');
+                    });
+                }
+                
                 document.getElementById('modalTemplateTemperature').value = config.temperature || 0.7;
                 document.getElementById('modalTemplateTemperatureValue').textContent = config.temperature || 0.7;
                 document.getElementById('modalTemplateMaxTokens').value = config.max_tokens || 2000;
                 document.getElementById('modalTemplateTimeout').value = config.timeout || 300;
 
-                // Research and search settings
+                // Research settings
                 document.getElementById('modalTemplateDeepResearch').checked = config.deep_research_enabled || false;
-                document.getElementById('modalTemplateWebSearch').checked = config.web_search_enabled || true;
+
+                // Data source settings (mutually exclusive)
+                const webSearchEnabled = config.web_search_enabled || false;
+                const ragEnabled = config.rag_enabled || false;
+
+                // Determine which data source is selected
+                if (ragEnabled && !webSearchEnabled) {
+                    document.getElementById('modalTemplateDataSourceRAG').checked = true;
+                    console.log('Setting RAG as selected data source');
+                } else {
+                    // Default to web search if both false or both true (invalid state)
+                    document.getElementById('modalTemplateDataSourceWeb').checked = true;
+                    console.log('Setting web search as selected data source');
+                }
+
+                // Web search settings
                 document.getElementById('modalTemplateSearchEngine').value = config.search_engine || 'duckduckgo';
                 document.getElementById('modalTemplateSearchResults').value = config.search_results_count || 10;
                 document.getElementById('modalTemplateIncludeImages').checked = config.include_images || false;
 
                 // RAG settings
-                document.getElementById('modalTemplateRAG').checked = config.rag_enabled || false;
                 document.getElementById('modalTemplateRAGTopK').value = config.rag_top_k || 5;
                 document.getElementById('modalTemplateRAGContextWindow').value = config.rag_context_window || 2;
                 document.getElementById('modalTemplateDocumentLinks').value = (config.document_links || []).join('\n');
 
-                // Update UI based on settings
-                this.toggleModalTemplateWebSearchConfig(config.web_search_enabled || true);
-                this.toggleModalTemplateRAGConfig(config.rag_enabled || false);
+                // New RAG config fields
+                document.getElementById('templateRAGTopK').value = config.rag_top_k || 5;
+                document.getElementById('templateRAGContextWindow').value = config.rag_context_window || 2;
+                document.getElementById('templateRAGDocumentLinks').value = (config.document_links || []).join('\n');
+                document.getElementById('templateForceReloadRAG').checked = false;
+                document.getElementById('templateRAGTestResult').textContent = '';
+
+                // Update UI based on current data source selection
+                // Call immediately since DOM should be ready
+                this.handleTemplateDataSourceChange();
             }
 
             async saveTemplateConfigModal() {
+                console.log('🔘 保存按钮被点击');
+                
                 const templateId = document.getElementById('templateConfigModal').dataset.templateId;
-                if (!templateId) return;
+                console.log('📋 模板ID:', templateId);
+                
+                if (!templateId) {
+                    console.error('❌ 未找到模板ID');
+                    this.showAlert('未找到模板ID，无法保存配置', 'danger');
+                    return;
+                }
 
                 // Get current template data first to preserve name and description
+                console.log('📥 获取模板当前数据...');
                 const currentResponse = await fetch(`/api/templates/${templateId}`);
                 const currentData = await currentResponse.json();
+                console.log('📊 当前模板数据:', currentData);
                 const currentTemplate = currentData.success ? currentData.template : {};
+
+                // Get data source selection
+                const dataSource = document.querySelector('input[name="templateDataSource"]:checked').value;
+                const isWebSearch = (dataSource === 'web_search');
+                const isRAG = (dataSource === 'rag');
+
+                // Validate RAG configuration
+                if (isRAG) {
+                    const documentLinks = document.getElementById('templateRAGDocumentLinks').value
+                        .split('\n').filter(link => link.trim() !== '');
+                    if (documentLinks.length === 0) {
+                        this.showAlert('启用本地文档RAG时，必须配置至少一个文档路径', 'warning');
+                        return;
+                    }
+                }
+
+                console.log('📝 构建配置对象...');
+                // Get model type and corresponding specific model
+                const modelType = document.getElementById('modalTemplateDefaultModel').value;
+                const openaiModel = document.getElementById('modalTemplateOpenAIModel').value.trim();
+                const geminiModel = document.getElementById('modalTemplateGeminiModel').value.trim();
+                const ollamaModel = document.getElementById('modalTemplateOllamaModel').value;
+                
+                console.log('📊 读取的模型配置:');
+                console.log('  模型类型:', modelType);
+                console.log('  OpenAI模型:', openaiModel);
+                console.log('  Gemini模型:', geminiModel);
+                console.log('  Ollama模型:', ollamaModel);
+
+                // Validate model selection based on type
+                if (modelType === 'openai' && !openaiModel) {
+                    this.showAlert('错误: 选择OpenAI时必须输入模型名称（例如: gpt-4o）', 'danger');
+                    console.error('❌ OpenAI model type selected but no model name provided');
+                    return;
+                }
+
+                if (modelType === 'gemini' && !geminiModel) {
+                    this.showAlert('错误: 选择Gemini时必须输入模型名称（例如: gemini-1.5-pro）', 'danger');
+                    console.error('❌ Gemini model type selected but no model name provided');
+                    return;
+                }
+
+                if (modelType === 'ollama' && !ollamaModel) {
+                    this.showAlert('错误: 选择Ollama时必须从列表中选择一个本地模型', 'danger');
+                    console.error('❌ Ollama model type selected but no specific model chosen');
+                    return;
+                }
 
                 const config = {
                     name: currentTemplate.name || templateId,
                     description: currentTemplate.description || '',
                     config: {
-                        default_model: document.getElementById('modalTemplateDefaultModel').value,
+                        default_model: modelType,
+                        preferred_openai_model: openaiModel,
+                        preferred_gemini_model: geminiModel,
+                        preferred_ollama_model: ollamaModel,
                         temperature: parseFloat(document.getElementById('modalTemplateTemperature').value),
                         max_tokens: parseInt(document.getElementById('modalTemplateMaxTokens').value),
                         timeout: parseInt(document.getElementById('modalTemplateTimeout').value),
                         deep_research_enabled: document.getElementById('modalTemplateDeepResearch').checked,
-                        web_search_enabled: document.getElementById('modalTemplateWebSearch').checked,
+                        web_search_enabled: isWebSearch,
                         search_engine: document.getElementById('modalTemplateSearchEngine').value,
                         search_results_count: parseInt(document.getElementById('modalTemplateSearchResults').value),
                         include_images: document.getElementById('modalTemplateIncludeImages').checked,
-                        rag_enabled: document.getElementById('modalTemplateRAG').checked,
-                        rag_top_k: parseInt(document.getElementById('modalTemplateRAGTopK').value),
-                        rag_context_window: parseInt(document.getElementById('modalTemplateRAGContextWindow').value),
-                        document_links: document.getElementById('modalTemplateDocumentLinks').value.split('\n').filter(link => link.trim() !== '')
+                        rag_enabled: isRAG,
+                        rag_top_k: parseInt(document.getElementById('templateRAGTopK').value),
+                        rag_context_window: parseInt(document.getElementById('templateRAGContextWindow').value),
+                        document_links: document.getElementById('templateRAGDocumentLinks').value.split('\n').filter(link => link.trim() !== '')
                     }
                 };
+                console.log('📊 配置对象:', config);
 
                 try {
+                    console.log(`📤 发送保存请求到: /api/templates/${templateId}`);
                     const response = await fetch(`/api/templates/${templateId}`, {
                         method: 'PUT',
                         headers: {
@@ -2256,9 +2928,12 @@
                         body: JSON.stringify(config)
                     });
 
+                    console.log(`📥 收到响应: 状态码=${response.status}, 状态文本=${response.statusText}`);
                     const data = await response.json();
+                    console.log('📊 响应数据:', data);
 
                     if (data.success) {
+                        console.log('✅ 配置保存成功');
                         // Close modal and reload templates list
                         const modal = bootstrap.Modal.getInstance(document.getElementById('templateConfigModal'));
                         modal.hide();
@@ -2269,11 +2944,12 @@
                         // Show success message
                         this.showAlert('模板配置已更新', 'success');
                     } else {
+                        console.error('❌ 配置保存失败:', data.error);
                         this.showAlert(`更新失败: ${data.error}`, 'danger');
                     }
                 } catch (error) {
-                    console.error('Failed to save template config:', error);
-                    this.showAlert('保存配置时发生错误', 'danger');
+                    console.error('❌ 保存配置时发生错误:', error);
+                    this.showAlert(`保存配置时发生错误: ${error.message}`, 'danger');
                 }
             }
 
@@ -2469,6 +3145,141 @@
                 ragConfig.style.display = enabled ? 'block' : 'none';
             }
 
+            // Handle model type change in template config
+            handleTemplateModelTypeChange(modelType, preferredModel = '') {
+                console.log('🔄 模型类型切换:', modelType, '首选模型:', preferredModel);
+                
+                // Hide all model-specific sections
+                document.getElementById('templateOpenAIModelSection').style.display = 'none';
+                document.getElementById('templateGeminiModelSection').style.display = 'none';
+                document.getElementById('templateOllamaModelSection').style.display = 'none';
+                
+                // Show the appropriate section
+                if (modelType === 'openai') {
+                    document.getElementById('templateOpenAIModelSection').style.display = 'block';
+                } else if (modelType === 'gemini') {
+                    document.getElementById('templateGeminiModelSection').style.display = 'block';
+                } else if (modelType === 'ollama') {
+                    document.getElementById('templateOllamaModelSection').style.display = 'block';
+                    // Load Ollama models when switching to Ollama
+                    console.log('🚀 切换到Ollama，开始加载模型...');
+                    console.log('   传递的首选模型:', preferredModel || '(无)');
+                    // Use the preferred model passed from caller, not the current value
+                    this.loadOllamaModelsForTemplate(preferredModel);
+                }
+                
+                console.log(`✅ 显示 ${modelType} 模型选择器`);
+            }
+
+            // Load Ollama models for template configuration
+            async loadOllamaModelsForTemplate(selectedModel = '') {
+                console.log('📥 加载 Ollama 模型列表...');
+                
+                const select = document.getElementById('modalTemplateOllamaModel');
+                const statusDiv = document.getElementById('ollamaModelsStatus');
+                
+                // Show loading state
+                select.innerHTML = '<option value="">-- 加载中... --</option>';
+                select.disabled = true;
+                
+                if (statusDiv) {
+                    statusDiv.innerHTML = '<small class="text-info"><i class="fas fa-spinner fa-spin"></i> 正在从本地Ollama加载模型...</small>';
+                }
+                
+                try {
+                    const response = await fetch('/api/ollama-models');
+                    const data = await response.json();
+                    
+                    console.log('📊 Ollama API 响应:', data);
+                    
+                    select.innerHTML = '<option value="">-- 请选择Ollama模型 --</option>';
+                    
+                    if (data.success && data.models && data.models.length > 0) {
+                        data.models.forEach(modelInfo => {
+                            const option = document.createElement('option');
+                            // API返回的是对象，需要提取name属性
+                            const modelName = typeof modelInfo === 'string' ? modelInfo : modelInfo.name;
+                            option.value = modelName;
+                            
+                            // 显示模型名称和大小信息
+                            if (modelInfo.size_gb) {
+                                option.textContent = `${modelName} (${modelInfo.size_gb} GB)`;
+                            } else {
+                                option.textContent = modelName;
+                            }
+                            
+                            if (modelName === selectedModel) {
+                                option.selected = true;
+                            }
+                            select.appendChild(option);
+                        });
+                        
+                        select.disabled = false;
+                        console.log(`✅ 成功加载 ${data.models.length} 个 Ollama 模型`);
+                        
+                        if (statusDiv) {
+                            statusDiv.innerHTML = `<small class="text-success"><i class="fas fa-check-circle"></i> 已加载 ${data.models.length} 个本地模型</small>`;
+                        }
+                    } else {
+                        console.warn('⚠️ 没有可用的 Ollama 模型');
+                        const option = document.createElement('option');
+                        option.value = '';
+                        option.textContent = '-- 没有可用的Ollama模型 --';
+                        option.disabled = true;
+                        select.appendChild(option);
+                        select.disabled = false;
+                        
+                        if (statusDiv) {
+                            statusDiv.innerHTML = '<small class="text-warning"><i class="fas fa-exclamation-triangle"></i> 未找到本地Ollama模型，请确保Ollama正在运行</small>';
+                        }
+                    }
+                } catch (error) {
+                    console.error('❌ 加载 Ollama 模型失败:', error);
+                    select.innerHTML = '<option value="">-- 加载失败 --</option>';
+                    select.disabled = false;
+                    
+                    if (statusDiv) {
+                        statusDiv.innerHTML = `<small class="text-danger"><i class="fas fa-times-circle"></i> 加载失败: ${error.message}<br>请确保Ollama服务正在运行</small>`;
+                    }
+                }
+            }
+
+            // Handle data source radio button changes
+            handleTemplateDataSourceChange() {
+                const checkedRadio = document.querySelector('input[name="templateDataSource"]:checked');
+                if (!checkedRadio) {
+                    console.log('No data source radio button is checked');
+                    return;
+                }
+
+                const dataSource = checkedRadio.value;
+                const isWebSearch = (dataSource === 'web_search');
+                const isRAG = (dataSource === 'rag');
+
+                console.log('Data source changed to:', dataSource, 'isRAG:', isRAG);
+
+                // Update status display
+                this.updateTemplateDataSourceStatus(dataSource);
+
+                // Toggle configuration sections
+                this.toggleModalTemplateWebSearchConfig(isWebSearch);
+                this.toggleTemplateRAGConfigSection(isRAG);
+
+                console.log('RAG config section should be:', isRAG ? 'visible' : 'hidden');
+            }
+
+            updateTemplateDataSourceStatus(dataSource) {
+                const statusElement = document.getElementById('templateDataSourceStatusText');
+
+                if (dataSource === 'web_search') {
+                    statusElement.innerHTML = '<i class="fas fa-globe text-primary me-1"></i>当前选择：网络搜索 - 将从互联网获取信息';
+                    statusElement.className = 'text-primary';
+                } else if (dataSource === 'rag') {
+                    statusElement.innerHTML = '<i class="fas fa-file-alt text-success me-1"></i>当前选择：本地文档RAG - 将基于本地文档提供精确回答';
+                    statusElement.className = 'text-success';
+                }
+            }
+
             toggleModalTemplateWebSearchConfig(enabled) {
                 const webSearchConfig = document.getElementById('modalTemplateWebSearchConfig');
                 webSearchConfig.style.display = enabled ? 'block' : 'none';
@@ -2479,8 +3290,112 @@
                 ragConfig.style.display = enabled ? 'block' : 'none';
             }
 
+            toggleTemplateRAGConfigSection(enabled) {
+                const ragConfigSection = document.getElementById('templateRAGConfigSection');
+                if (ragConfigSection) {
+                    ragConfigSection.style.display = enabled ? 'block' : 'none';
+                    console.log('RAG config section display set to:', enabled ? 'block' : 'none');
+                } else {
+                    console.error('templateRAGConfigSection element not found');
+                }
+            }
+
+            // Show dedicated RAG configuration modal
+            showRAGConfigModal() {
+                // Get current template configuration
+                const templateId = document.getElementById('templateConfigModal').dataset.templateId;
+                if (!templateId) return;
+
+                // Load current RAG configuration
+                this.loadRAGConfigForTemplate(templateId);
+
+                // Show the RAG config modal
+                const modal = new bootstrap.Modal(document.getElementById('ragConfigModal'));
+                modal.show();
+            }
+
+            // Load RAG configuration for template
+            async loadRAGConfigForTemplate(templateId) {
+                try {
+                    const response = await fetch(`/api/templates/${templateId}`);
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        const config = data.template.config || {};
+
+                        // Populate RAG configuration
+                        document.getElementById('ragTopK').value = config.rag_top_k || 5;
+                        document.getElementById('ragContextWindow').value = config.rag_context_window || 2;
+                        document.getElementById('ragDocumentLinks').value = (config.document_links || []).join('\n');
+                        document.getElementById('forceReloadRAG').checked = false;
+
+                        // Clear test result
+                        document.getElementById('ragTestResult').textContent = '';
+                    }
+                } catch (error) {
+                    console.error('Failed to load RAG config:', error);
+                    this.showAlert('加载RAG配置失败', 'danger');
+                }
+            }
+
+            // Save RAG configuration
+            async saveRAGConfig() {
+                const templateId = document.getElementById('templateConfigModal').dataset.templateId;
+                if (!templateId) return;
+
+                // Validate document links
+                const documentLinks = document.getElementById('ragDocumentLinks').value
+                    .split('\n').filter(link => link.trim() !== '');
+
+                if (documentLinks.length === 0) {
+                    this.showAlert('必须配置至少一个文档路径', 'warning');
+                    return;
+                }
+
+                // Prepare RAG configuration
+                const ragConfig = {
+                    rag_enabled: true,
+                    web_search_enabled: false,
+                    rag_top_k: parseInt(document.getElementById('ragTopK').value),
+                    rag_context_window: parseInt(document.getElementById('ragContextWindow').value),
+                    document_links: documentLinks
+                };
+
+                try {
+                    const response = await fetch(`/api/templates/${templateId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            config: ragConfig
+                        })
+                    });
+
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Close RAG config modal
+                        const ragModal = bootstrap.Modal.getInstance(document.getElementById('ragConfigModal'));
+                        if (ragModal) ragModal.hide();
+
+                        // Update template config modal
+                        this.showAlert('RAG配置已保存', 'success');
+
+                        // Reload template list
+                        await this.loadTemplatesList();
+                    } else {
+                        this.showAlert(`保存失败: ${data.error}`, 'danger');
+                    }
+                } catch (error) {
+                    console.error('Failed to save RAG config:', error);
+                    this.showAlert('保存RAG配置时发生错误', 'danger');
+                }
+            }
+
+
             async testRAGDocuments() {
-                const documentLinks = document.getElementById('modalAgentDocumentLinks').value
+                const documentLinks = document.getElementById('ragDocumentLinks').value
                     .split('\n')
                     .filter(link => link.trim() !== '');
 
@@ -2525,8 +3440,8 @@
                                         successCount += result.successful;
                                         if (result.failed > 0) {
                                             errorDetails.push(`${link.trim()}: ${result.failed} 个文档加载失败`);
-                                        }
-                                    } else {
+                        }
+                    } else {
                                         // 处理单个文件加载的结果
                                         successCount++;
                                     }
@@ -2543,8 +3458,8 @@
                                         errorDetails.push(`${link.trim()}: ${result.error}${result.details ? ' (' + result.details + ')' : ''}`);
                                         console.error(`Failed to load: ${link.trim()}`, result);
                                     }
-                                }
-                            } catch (error) {
+                    }
+                } catch (error) {
                                 errorDetails.push(`${link.trim()}: Network error - ${error.message}`);
                                 console.error(`Network error for document: ${link.trim()}`, error);
                             }
@@ -2631,132 +3546,331 @@
                 }
             }
 
-            async testTemplateRAGDocuments() {
-                const documentLinks = document.getElementById('modalTemplateDocumentLinks').value
-                    .split('\n')
-                    .filter(link => link.trim() !== '');
-
-                if (documentLinks.length === 0) {
-                    document.getElementById('templateRAGTestResult').textContent = '请先输入文档路径';
-                    document.getElementById('templateRAGTestResult').className = 'text-warning';
+            // 显示详细错误信息的函数
+            showDetailedError(message, type, details = '') {
+                const resultElement = document.getElementById('templateRAGTestResult');
+                if (!resultElement) {
+                    console.error('templateRAGTestResult element not found');
                     return;
                 }
 
-                const forceReload = document.getElementById('forceReloadTemplateRAG').checked;
-                document.getElementById('templateRAGTestResult').textContent = forceReload ? '正在强制重新加载文档...' : '正在测试文档加载...';
-                document.getElementById('templateRAGTestResult').className = 'text-info';
-                document.getElementById('testTemplateRAGDocumentsBtn').disabled = true;
+                // 设置主要消息
+                resultElement.textContent = message;
+                resultElement.className = `alert alert-${type}`;
+                resultElement.style.display = 'block';
+
+                // 显示调试信息区域
+                const debugInfoElement = document.getElementById('templateRAGDebugInfo');
+                if (debugInfoElement) {
+                    debugInfoElement.style.display = 'block';
+                }
+
+                // 记录到调试日志
+                this.logToDebug(`[${type.toUpperCase()}] ${message}`);
+                if (details) {
+                    this.logToDebug(`详细信息: ${details}`);
+                }
+
+                // 如果有详细信息，添加到title属性中，并在控制台显示
+                if (details) {
+                    resultElement.title = details;
+                    console.log(`📋 ${type.toUpperCase()}: ${message}`);
+                    console.log(`🔍 详细信息: ${details}`);
+                }
+
+                // 如果是错误类型，也显示在页面上
+                if (type === 'danger' && details) {
+                    const detailsElement = document.createElement('div');
+                    detailsElement.className = 'mt-2 small text-muted';
+                    detailsElement.innerHTML = `<strong>调试信息:</strong> ${details}`;
+                    resultElement.appendChild(detailsElement);
+                }
+            }
+
+            // 记录到调试日志
+            logToDebug(message) {
+                const debugLog = document.getElementById('debugLog');
+                if (debugLog) {
+                    const timestamp = new Date().toLocaleTimeString();
+                    const logEntry = document.createElement('div');
+                    logEntry.innerHTML = `[${timestamp}] ${message}`;
+                    debugLog.appendChild(logEntry);
+                    debugLog.scrollTop = debugLog.scrollHeight;
+                }
+                console.log(message);
+            }
+
+            // 检测可用的API端点
+            async detectAPIEndpoint() {
+                // 首先尝试当前页面的origin（最可能正确）
+                const currentOrigin = window.location.origin;
+                console.log(`🔍 首先尝试当前页面的origin: ${currentOrigin}`);
+                
+                try {
+                    const response = await Promise.race([
+                        fetch(`${currentOrigin}/api/rag/status`, { method: 'GET' }),
+                        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000))
+                    ]);
+                    
+                    if (response && response.ok) {
+                        console.log(`✅ API连接成功: ${currentOrigin}`);
+                        return currentOrigin;
+                    }
+                } catch (error) {
+                    console.log(`⚠️ 当前origin连接失败: ${error.message}`);
+                }
+                
+                // 如果当前origin失败，尝试其他常用端口
+                const ports = [5050, 5051, 5000];
+                
+                for (const port of ports) {
+                    try {
+                        const baseUrl = `http://localhost:${port}`;
+                        const url = `${baseUrl}/api/rag/status`;
+                        console.log(`🔍 尝试连接: ${url}`);
+                        
+                        const response = await Promise.race([
+                            fetch(url, { method: 'GET' }),
+                            new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000))
+                        ]);
+                        
+                        if (response && (response.ok || response.status === 503)) {
+                            console.log(`✅ API连接成功: ${baseUrl} (status: ${response.status})`);
+                            return baseUrl;
+                        }
+                    } catch (error) {
+                        console.log(`❌ 端口 ${port} 连接失败: ${error.message}`);
+                    }
+                }
+                
+                console.error('❌ 所有端口都无法连接');
+                return null;
+            }
+
+            async testTemplateRAGDocuments() {
+                this.logToDebug('🔘 开始测试RAG文档加载...');
+                
+                const documentLinks = document.getElementById('templateRAGDocumentLinks').value
+                    .split('\n')
+                    .filter(link => link.trim() !== '');
+
+                this.logToDebug(`📄 文档路径列表: ${documentLinks.join(', ')}`);
+
+                if (documentLinks.length === 0) {
+                    this.showDetailedError('请先输入文档路径', 'warning', '没有提供任何文档路径');
+                    return;
+                }
+
+                const forceReload = document.getElementById('templateForceReloadRAG').checked;
+                this.logToDebug(`🔄 强制重新加载: ${forceReload}`);
+                
+                this.showDetailedError(forceReload ? '正在强制重新加载文档...' : '正在测试文档加载...', 'info', '开始处理文档加载请求');
+                document.getElementById('testTemplateRAGDocumentsBtnModal').disabled = true;
 
                 try {
                     let successCount = 0;
                     let totalCount = 0;
-
                     let errorDetails = [];
+                    let debugInfo = [];
+
+                    // 首先检查API连接
+                    this.logToDebug('🌐 检查API连接...');
+                    const apiUrl = await this.detectAPIEndpoint();
+                    if (!apiUrl) {
+                        this.showDetailedError('无法连接到服务器', 'danger', '请确保Flask应用正在运行');
+                        return;
+                    }
+                    debugInfo.push(`API端点: ${apiUrl}`);
+                    this.logToDebug(`✅ API连接成功: ${apiUrl}`);
 
                     for (const link of documentLinks) {
                         if (link.trim()) {
                             totalCount++;
+                            this.logToDebug(`📁 处理路径 ${totalCount}/${documentLinks.length}: ${link.trim()}`);
+                            
                             try {
-                                const response = await fetch('/api/rag/documents', {
+                                const formData = new FormData();
+                                formData.append('file_path', link.trim());
+                                formData.append('force_reload', forceReload.toString());
+
+                                this.logToDebug(`📤 发送请求到: ${apiUrl}/api/rag/documents`);
+                                this.logToDebug(`📋 请求数据: file_path=${link.trim()}, force_reload=${forceReload}`);
+
+                                const response = await fetch(`${apiUrl}/api/rag/documents`, {
                                     method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                    },
-                                    body: JSON.stringify({
-                                        file_path: link.trim(),
-                                        force_reload: forceReload
-                                    })
+                                    body: formData
                                 });
 
+                                this.logToDebug(`📥 收到响应: 状态码=${response.status}, 状态文本=${response.statusText}`);
+
+                                if (!response.ok) {
+                                    const errorText = await response.text();
+                                    this.logToDebug(`❌ HTTP错误 ${response.status}: ${errorText}`);
+                                    errorDetails.push(`${link.trim()}: HTTP ${response.status} - ${response.statusText}`);
+                                    debugInfo.push(`路径 ${link.trim()}: HTTP错误 ${response.status}`);
+                                    continue;
+                                }
+
                                 const result = await response.json();
+                                this.logToDebug(`📊 响应数据: ${JSON.stringify(result)}`);
+
                                 if (result.success) {
                                     if (result.successful !== undefined) {
                                         successCount += result.successful;
+                                        this.logToDebug(`✅ 路径 ${link.trim()}: 成功加载 ${result.successful} 个文档`);
+                                        debugInfo.push(`路径 ${link.trim()}: 成功加载 ${result.successful} 个文档`);
                                         if (result.failed > 0) {
                                             errorDetails.push(`${link.trim()}: ${result.failed} 个文档加载失败`);
+                                            debugInfo.push(`路径 ${link.trim()}: ${result.failed} 个文档失败`);
                                         }
                                     } else {
                                         successCount++;
+                                        this.logToDebug(`✅ 路径 ${link.trim()}: 成功加载文档`);
+                                        debugInfo.push(`路径 ${link.trim()}: 成功加载文档`);
                                     }
                                 } else {
+                                    const errorMsg = result.error || '未知错误';
+                                    const details = result.details || '';
+                                    this.logToDebug(`❌ 加载失败: ${errorMsg}`);
+                                    
                                     if (result.error && result.error.includes('All documents in directory are already loaded')) {
                                         errorDetails.push(`${link.trim()}: 文档已存在，可使用强制重新加载更新`);
+                                        debugInfo.push(`路径 ${link.trim()}: 文档已存在`);
                                     } else {
-                                        errorDetails.push(`${link.trim()}: ${result.error}${result.details ? ' (' + result.details + ')' : ''}`);
+                                        errorDetails.push(`${link.trim()}: ${errorMsg}${details ? ' (' + details + ')' : ''}`);
+                                        debugInfo.push(`路径 ${link.trim()}: ${errorMsg}`);
                                     }
-                                    console.error(`Failed to load: ${link.trim()}`, result);
                                 }
                             } catch (error) {
-                                errorDetails.push(`${link.trim()}: Network error - ${error.message}`);
-                                console.error(`Network error for document: ${link.trim()}`, error);
+                                this.logToDebug(`❌ 网络错误: ${error.message}`);
+                                errorDetails.push(`${link.trim()}: 网络错误 - ${error.message}`);
+                                debugInfo.push(`路径 ${link.trim()}: 网络错误 - ${error.message}`);
                             }
                         }
                     }
 
+                    this.logToDebug(`📊 处理结果: 成功=${successCount}, 总数=${totalCount}, 错误=${errorDetails.length}`);
+
+                    // 显示详细结果
                     if (successCount > 0) {
                         if (errorDetails.length === 0) {
-                            document.getElementById('templateRAGTestResult').textContent = `测试成功：共加载 ${successCount} 个文档`;
-                            document.getElementById('templateRAGTestResult').className = 'text-success';
+                            this.showDetailedError(`测试成功：共加载 ${successCount} 个文档`, 'success', debugInfo.join('; '));
                         } else {
-                            document.getElementById('templateRAGTestResult').textContent = `部分成功：共加载 ${successCount} 个文档，${errorDetails.length} 个路径有问题`;
-                            document.getElementById('templateRAGTestResult').className = 'text-warning';
+                            this.showDetailedError(`部分成功：共加载 ${successCount} 个文档，${errorDetails.length} 个路径有问题`, 'warning', 
+                                `成功: ${debugInfo.filter(info => info.includes('成功')).join('; ')}; 错误: ${errorDetails.join('; ')}`);
                         }
                     } else {
                         if (errorDetails.some(detail => detail.includes('文档已存在'))) {
-                            document.getElementById('templateRAGTestResult').textContent = `文档已存在：${errorDetails.length} 个路径的文档都已加载。如需更新文档内容，请勾选上方的"强制重新加载"选项后重试`;
-                            document.getElementById('templateRAGTestResult').className = 'text-info';
+                            this.showDetailedError(`文档已存在：${errorDetails.length} 个路径的文档都已加载。如需更新文档内容，请勾选上方的"强制重新加载"选项后重试`, 'info', debugInfo.join('; '));
                         } else {
-                            document.getElementById('templateRAGTestResult').textContent = `测试失败：未能加载任何文档`;
-                            document.getElementById('templateRAGTestResult').className = 'text-danger';
-                            if (errorDetails.length > 0) {
-                                console.error('文档加载失败详情:', errorDetails);
-                            }
+                            this.showDetailedError(`测试失败：未能加载任何文档`, 'danger', 
+                                `错误详情: ${errorDetails.join('; ')}; 调试信息: ${debugInfo.join('; ')}`);
                         }
                     }
 
                 } catch (error) {
-                    document.getElementById('templateRAGTestResult').textContent = `测试出错：${error.message}`;
-                    document.getElementById('templateRAGTestResult').className = 'text-danger';
+                    console.error('❌ 测试过程出错:', error);
+                    this.showDetailedError(`测试出错：${error.message}`, 'danger', `错误类型: ${error.name}; 堆栈: ${error.stack}`);
                 } finally {
-                    document.getElementById('testTemplateRAGDocumentsBtn').disabled = false;
+                    document.getElementById('testTemplateRAGDocumentsBtnModal').disabled = false;
+                    console.log('✅ 测试完成');
                 }
             }
 
             async clearTemplateRAGDocuments() {
+                this.logToDebug('🗑️ 开始清除RAG文档...');
+                
                 if (!confirm('确定要清除所有已加载的RAG文档吗？此操作不可撤销。')) {
+                    this.logToDebug('❌ 用户取消了清除操作');
                     return;
                 }
 
-                document.getElementById('templateRAGTestResult').textContent = '正在清除文档...';
-                document.getElementById('templateRAGTestResult').className = 'text-info';
-                document.getElementById('clearTemplateRAGDocumentsBtn').disabled = true;
+                this.showDetailedError('正在清除文档...', 'info', '开始清除所有RAG文档');
+                document.getElementById('clearTemplateRAGDocumentsBtnModal').disabled = true;
 
                 try {
-                    const response = await fetch('/api/rag/documents', {
+                    // 检测API端点
+                    this.logToDebug('🌐 检测API端点...');
+                    const apiUrl = await this.detectAPIEndpoint();
+                    if (!apiUrl) {
+                        this.showDetailedError('无法连接到服务器', 'danger', '请确保Flask应用正在运行');
+                        return;
+                    }
+
+                    this.logToDebug(`📤 发送DELETE请求到: ${apiUrl}/api/rag/documents`);
+                    
+                    const response = await fetch(`${apiUrl}/api/rag/documents`, {
                         method: 'DELETE',
                         headers: {
                             'Content-Type': 'application/json',
                         }
                     });
 
+                    this.logToDebug(`📥 收到响应: 状态码=${response.status}, 状态文本=${response.statusText}`);
+
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        this.logToDebug(`❌ HTTP错误 ${response.status}: ${errorText}`);
+                        this.showDetailedError(`清除失败: HTTP ${response.status} - ${response.statusText}`, 'danger', 
+                            `HTTP错误详情: ${errorText}`);
+                        return;
+                    }
+
                     const result = await response.json();
+                    this.logToDebug(`📊 清除结果: ${JSON.stringify(result)}`);
 
                     if (result.success) {
-                        document.getElementById('templateRAGTestResult').textContent = '文档清除成功！现在可以重新加载文档了。';
-                        document.getElementById('templateRAGTestResult').className = 'text-success';
+                        this.showDetailedError('文档清除成功！现在可以重新加载文档了。', 'success', 
+                            `清除操作完成，API响应: ${JSON.stringify(result)}`);
                     } else {
-                        document.getElementById('templateRAGTestResult').textContent = `清除失败: ${result.error}`;
-                        document.getElementById('templateRAGTestResult').className = 'text-danger';
+                        this.showDetailedError(`清除失败: ${result.error}`, 'danger', 
+                            `API错误响应: ${JSON.stringify(result)}`);
                     }
                 } catch (error) {
-                    document.getElementById('templateRAGTestResult').textContent = `清除出错：${error.message}`;
-                    document.getElementById('templateRAGTestResult').className = 'text-danger';
+                    this.logToDebug(`❌ 清除过程出错: ${error.message}`);
+                    this.showDetailedError(`清除出错：${error.message}`, 'danger', 
+                        `错误类型: ${error.name}; 堆栈: ${error.stack}`);
                 } finally {
-                    document.getElementById('clearTemplateRAGDocumentsBtn').disabled = false;
+                    document.getElementById('clearTemplateRAGDocumentsBtnModal').disabled = false;
+                    this.logToDebug('✅ 清除操作完成');
                 }
             }
 
 
+        }
+
+        // 调试信息相关函数
+        function toggleDebugInfo() {
+            const content = document.getElementById('debugInfoContent');
+            const icon = document.getElementById('debugToggleIcon');
+            
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                icon.className = 'fas fa-eye-slash';
+            } else {
+                content.style.display = 'none';
+                icon.className = 'fas fa-eye';
+            }
+        }
+
+        function clearDebugLog() {
+            const debugLog = document.getElementById('debugLog');
+            if (debugLog) {
+                debugLog.innerHTML = '';
+            }
+        }
+
+        function copyDebugLog() {
+            const debugLog = document.getElementById('debugLog');
+            if (debugLog) {
+                const text = debugLog.innerText;
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('调试日志已复制到剪贴板');
+                }).catch(err => {
+                    console.error('复制失败:', err);
+                    alert('复制失败，请手动选择文本复制');
+                });
+            }
         }
 
         // Initialize the application

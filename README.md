@@ -1,18 +1,20 @@
 # 迷途小書僮 - 多智能体研究助手系统
 
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://python.org)
-[![Flask](https://img.shields.io/badge/Flask-2.3.3-green.svg)](https://flask.palletsprojects.com)
+[![Flask](https://img.shields.io/badge/Flask-3.0+-green.svg)](https://flask.palletsprojects.com)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-一个基于Flask的现代化多智能体研究助手系统，支持本地Ollama LLM和云端OpenAI、Google Gemini模型，提供专业化的研究分析和连续对话功能。
+一个基于Flask的现代化多智能体研究助手系统，支持本地Ollama LLM和云端OpenAI、Google Gemini模型，集成本地文档RAG功能，提供专业化的研究分析和连续对话功能。
 
 ## 🌟 核心特性
 
-### 🤖 多智能体系统
-- **研究助手** 🔍: 通用研究分析，擅长综合分析和多角度思考
-- **技术专家** 💻: 技术问题分析，专注于编程、架构和工程实践
-- **学术专家** 🎓: 学术研究分析，擅长文献综述和学术写作
-- **商业分析师** 📊: 商业策略分析，专注于市场分析和商业洞察
+### 🤖 多智能体系统（专业级Prompt）
+- **研究助手** 🔍: 系统性思维、批判性分析，提供6大板块的全面研究框架
+- **技术专家** 💻: 技术问题分析和解决方案，专注于编程、架构和工程实践
+- **学术专家** 🎓: 完整学术指导，包含论文结构、文献综述、研究方法、期刊投稿建议
+- **商业分析师** 📊: PEST分析、波特五力、商业模式画布、风险矩阵、实施路线图
+- **创意专家** 💡: SCAMPER创意技法、设计思维、原型测试、情感体验设计
+- **法律顾问** ⚖️: 法律分析、风险评估、合规建议、证据清单、法律文书框架
 
 ### 🔗 多模型支持
 - **OpenAI GPT**: GPT-4o, GPT-4-turbo, GPT-3.5-turbo
@@ -20,9 +22,12 @@
 - **Ollama (本地)**: deepseek-r1, llama2, codellama等本地模型
 
 ### 🌐 高级功能
+- **模板配置系统**: 灵活的智能体模板配置，支持独立的模型、RAG和搜索设置
+- **本地文档RAG**: 支持PDF、Word、Markdown、JSON等多格式文档的语义检索
+- **向量数据库**: 基于ChromaDB的本地向量存储，100%私有数据保护
 - **连续对话**: 基于之前研究结果进行进一步研究
 - **上下文保持**: 自动使用之前的研究结果作为上下文
-- **Web搜索集成**: 支持DuckDuckGo和Google搜索API
+- **Web搜索集成**: 支持DuckDuckGo和Google搜索API，卡片式结果展示
 - **深度研究**: 可配置的深度研究选项
 - **会话管理**: 支持多个独立的对话会话
 - **对话导出**: 导出完整的对话记录为JSON格式
@@ -34,18 +39,24 @@
 ├── 🌐 Web层
 │   ├── Flask应用 (app.py)
 │   ├── 模板系统 (templates/)
-│   └── 静态资源
+│   └── REST API接口
 │
 ├── 🤖 智能体层
-│   ├── 智能体管理器 (agents/agent_manager.py)
-│   ├── 动态智能体管理 (management/agent_manager.py)
-│   └── 智能体配置 (data/agent_definitions.json)
+│   ├── 智能体执行器 (agents/agent_manager.py)
+│   ├── 模板配置管理 (management/agent_manager.py)
+│   └── 智能体定义 (data/agent_definitions.json)
 │
 ├── 🧠 LLM层
 │   ├── LLM管理器 (llm/llm_manager.py)
 │   ├── OpenAI提供者
 │   ├── Gemini提供者
-│   └── Ollama提供者
+│   └── Ollama提供者（本地）
+│
+├── 📚 RAG层
+│   ├── RAG管理器 (rag/rag_manager.py)
+│   ├── 文档处理器 (rag/document_processor.py)
+│   ├── 向量存储 (rag/vector_store.py)
+│   └── ChromaDB数据库 (data/vector_store/)
 │
 ├── 🔍 搜索层
 │   ├── Web搜索模块 (search/web_search.py)
@@ -67,20 +78,22 @@
 
 ### 1. 环境要求
 
-- **Python**: 3.8+
-- **Ollama**: 可选，用于本地LLM
-- **API密钥**: OpenAI API密钥 (可选)
-- **API密钥**: Google API密钥 (可选)
+- **Python**: 3.8+ （推荐3.10+，已在Python 3.13.3测试通过）
+- **内存**: 至少4GB RAM（RAG功能需要8GB+）
+- **存储**: 至少2GB可用空间（包含模型缓存）
+- **Ollama**: 可选，用于本地LLM（推荐用于隐私保护）
+- **API密钥**: OpenAI API密钥（可选，用于GPT模型）
+- **API密钥**: Google API密钥（可选，用于Gemini模型）
 
 ### 2. 快速开始
 
 ```bash
 # 克隆项目
 git clone <repository-url>
-cd ResearchAssistant_0.2
+cd ResearchAssistant
 
 # 创建虚拟环境
-python -m venv venv
+python3 -m venv venv
 source venv/bin/activate  # Linux/Mac
 # 或
 venv\Scripts\activate     # Windows
@@ -94,7 +107,11 @@ cp env.example .env
 
 # 启动应用
 python run.py
+# 或
+python app.py
 ```
+
+访问: `http://localhost:5000`（端口可能是5000、5050或5051）
 
 ### 3. 详细配置
 
@@ -161,37 +178,44 @@ ollama serve
 # 开发模式
 python run.py
 
-# 生产模式
-gunicorn -w 4 -b 0.0.0.0:5050 app:app
+# 或直接运行Flask
+python app.py
+
+# 生产模式（使用gunicorn）
+gunicorn -w 4 -b 0.0.0.0:5000 app:app
 ```
 
-访问: `http://localhost:5050`
+访问: `http://localhost:5000`（或5050/5051，取决于端口配置）
 
 ### 2. Web界面使用
 
 #### 选择智能体
-- **研究助手** 🔍: 通用研究分析
-- **技术专家** 💻: 技术问题分析  
-- **学术专家** 🎓: 学术研究分析
-- **商业分析师** 📊: 商业策略分析
+系统提供6个专业级智能体，每个都配备了行业最佳实践的Prompt模板：
+- **研究助手** 🔍: 系统性思维框架、知识图谱、研究方向建议
+- **技术专家** 💻: 技术问题分析和解决方案
+- **学术专家** 🎓: 论文结构、文献综述、研究方法、期刊投稿
+- **商业分析师** 📊: PEST分析、波特五力、商业模式画布
+- **创意专家** 💡: SCAMPER技法、设计思维、原型测试
+- **法律顾问** ⚖️: 法律分析、风险评估、合规建议
 
-#### 选择LLM模型
-- **OpenAI GPT**: GPT-4o, GPT-4-turbo, GPT-3.5-turbo
-- **Google Gemini**: Gemini-1.5-pro, Gemini-1.5-flash
-- **Ollama (本地)**: 选择后可以进一步选择具体的本地模型
+#### 配置智能体模板
+在"配置管理"中，您可以为每个智能体配置：
+- **默认模型**: OpenAI/Gemini/Ollama（本地）
+- **具体模型选择**: 
+  - OpenAI: 自定义模型名（如 gpt-4o, gpt-3.5-turbo）
+  - Gemini: 自定义模型名（如 gemini-1.5-pro）
+  - Ollama: 从本地可用模型中选择（如 deepseek-r1:latest, gpt-oss:20b）
+- **网络搜索**: 启用/禁用，选择搜索引擎（DuckDuckGo/Google）
+- **本地文档RAG**: 启用/禁用，配置文档路径
+- **注意**: 网络搜索和本地RAG只能二选一
 
 #### 输入研究问题
 示例问题：
 - "人工智能在医疗领域的应用前景如何？"
-- "如何优化React应用的性能？"
-- "区块链技术在供应链管理中的应用"
-- "机器学习模型的可解释性研究现状"
-
-#### 深度研究选项
-- **启用Web搜索**: 自动搜索相关网络信息
-- **搜索引擎**: DuckDuckGo或Google搜索API
-- **搜索结果数量**: 5-20个结果
-- **包含图片**: 是否在搜索中包含图片结果
+- "如何撰写一篇关于机器学习的综述论文？"
+- "分析共享办公空间的商业模式和市场机会"
+- "为一个环保品牌设计创意营销活动"
+- "分析电商平台的用户协议法律风险"
 
 ### 3. 连续对话功能
 
@@ -209,39 +233,56 @@ gunicorn -w 4 -b 0.0.0.0:5050 app:app
 - **导出对话**: 下载JSON格式的完整对话记录
 - **上下文保持**: 自动使用之前的研究结果作为上下文
 
-### 5. 本地文档RAG功能
+### 5. 本地文档RAG功能 🔥
 
-基于本地文档的检索增强生成，让AI回答完全基于您的私有文档：
+基于本地文档的检索增强生成（Retrieval Augmented Generation），让AI回答完全基于您的私有文档：
 
+**核心特性**:
 - **多格式支持**: PDF、Word文档、Markdown、JSON、HTML、纯文本
-- **智能检索**: 语义搜索而非关键词匹配
-- **100%私有**: 回答完全基于本地文档，不使用外部知识
+- **语义检索**: 基于Sentence Transformers的语义搜索，非关键词匹配
+- **100%私有**: 回答完全基于本地文档，不使用LLM的预训练知识
+- **本地向量数据库**: 使用ChromaDB本地存储，数据不离开本地
 - **批量加载**: 支持文件夹批量加载文档
 - **实时测试**: 配置前可测试文档加载状态
 
 #### 配置方法：
-1. 进入"智能体管理" → 选择智能体 → "配置模板"
-2. 启用"本地文档RAG"
-3. 在"文档链接"中输入文档路径（每行一个）
-   - 支持单个文件：`/path/to/document.pdf`
-   - 支持整个文件夹：`/path/to/documents/` （会自动加载文件夹中的所有支持文件）
-4. 设置检索参数并测试加载
+1. 进入"配置管理"标签页
+2. 选择要配置的模板，点击"编辑配置"
+3. 在"数据源配置"中选择"本地文档RAG"
+4. RAG配置区域会自动展开：
+   - **Top K结果数**: 检索时返回的最相关文档片段数（默认5）
+   - **上下文窗口**: 每个片段的字符数（默认1000）
+   - **文档链接**: 每行一个路径，支持：
+     - 单个文件：`/path/to/document.pdf`
+     - 整个文件夹：`/path/to/documents/`（会自动加载所有支持文件）
+   - **强制重新加载**: 勾选后会清除现有文档重新加载
+5. 点击"测试文档加载"验证配置
+6. 点击"保存配置"
 
 #### 支持的文档格式：
 - `.pdf` - PDF文档
-- `.docx`/`.doc` - Word文档
+- `.docx`/`.doc` - Word文档  
 - `.md`/`.markdown` - Markdown文件
 - `.txt` - 纯文本文件
 - `.json` - JSON文件
 - `.html`/`.htm` - HTML文件
 
 #### 文档管理功能：
-- **强制重新加载**: 勾选"强制重新加载"选项可以清除现有文档并重新加载
-- **清除所有文档**: 使用"清除所有文档"按钮可以重置整个RAG系统
-- **重复文档检测**: 系统自动防止加载重复的文档，提高效率
+- **测试文档加载**: 在保存前测试文档是否能成功加载
+- **强制重新加载**: 清除现有文档并重新加载
+- **清除所有文档**: 重置整个RAG向量数据库
+
+#### 重要提示：
+- ⚠️ 网络搜索和本地文档RAG **只能二选一**，不能同时启用
+- ⚠️ 启用RAG后，查询结果将**100%基于您提供的文档**
+- ⚠️ 首次加载文档可能需要较长时间（取决于文档数量和大小）
+- ⚠️ 向量数据库存储在 `data/vector_store/` 目录
 
 #### 故障排除：
-如果遇到文档加载问题，请参考 [`docs/rag_troubleshooting.md`](docs/rag_troubleshooting.md)
+如果遇到文档加载问题，请参考：
+- [`docs/rag_troubleshooting.md`](docs/rag_troubleshooting.md) - RAG故障排除指南
+- [`docs/RAG_DIAGNOSTIC_GUIDE.md`](docs/RAG_DIAGNOSTIC_GUIDE.md) - RAG诊断指南
+- [`docs/RAG_NETWORK_ISSUE.md`](docs/RAG_NETWORK_ISSUE.md) - 网络问题说明
 
 ## 🔌 API接口
 
@@ -285,30 +326,35 @@ GET /api/conversation/<session_id>/export
 GET /api/conversations
 ```
 
-### 智能体和模型接口
+### 智能体和模板管理接口
 
 ```http
-# 获取可用智能体
+# 获取所有智能体
 GET /api/agents
 
-# 获取模型状态
-GET /api/models
+# 获取单个智能体
+GET /api/agents/<agent_id>
+
+# 更新智能体
+PUT /api/agents/<agent_id>
+
+# 获取所有模板
+GET /api/templates
+
+# 获取单个模板
+GET /api/templates/<template_id>
+
+# 更新模板配置
+PUT /api/templates/<template_id>
 
 # 获取Ollama模型列表
-GET /api/models/ollama
+GET /api/ollama-models
+
+# RAG系统状态
+GET /api/rag/status
 
 # 健康检查
 GET /api/health
-```
-
-### 智能体模板配置接口
-
-```http
-# 获取智能体模板配置
-GET /api/agents/template-config
-
-# 更新智能体模板配置
-POST /api/agents/template-config
 ```
 
 ### RAG文档管理接口
@@ -364,56 +410,72 @@ Content-Type: application/json
 ## 📁 项目结构
 
 ```
-ResearchAssistant_0.2/
+ResearchAssistant/
 ├── 📱 应用核心
-│   ├── app.py                    # Flask主应用
+│   ├── app.py                    # Flask主应用（API路由）
 │   ├── run.py                    # 启动脚本
-│   └── requirements.txt          # 依赖管理
+│   ├── requirements.txt          # 完整依赖
+│   └── requirements-minimal.txt  # 最小RAG依赖
 │
 ├── 🤖 智能体模块
 │   ├── agents/
 │   │   ├── __init__.py
-│   │   └── agent_manager.py      # 智能体管理器
+│   │   └── agent_manager.py      # 智能体执行器
 │   └── management/
 │       ├── __init__.py
-│       └── agent_manager.py      # 动态智能体管理
+│       └── agent_manager.py      # 模板配置管理
 │
 ├── 🧠 LLM模块
 │   └── llm/
 │       ├── __init__.py
-│       └── llm_manager.py        # LLM管理器
+│       └── llm_manager.py        # 多LLM提供商管理
+│
+├── 📚 RAG模块
+│   └── rag/
+│       ├── __init__.py
+│       ├── rag_manager.py        # RAG核心管理
+│       ├── document_processor.py  # 文档处理
+│       └── vector_store.py       # 向量数据库
 │
 ├── 🔍 搜索模块
 │   └── search/
 │       ├── __init__.py
-│       └── web_search.py         # Web搜索功能
+│       └── web_search.py         # 多搜索引擎集成
 │
 ├── 💬 对话模块
 │   └── conversation/
 │       ├── __init__.py
-│       └── conversation_manager.py # 对话管理器
+│       └── conversation_manager.py # 对话和会话管理
 │
 ├── ⚙️ 工具模块
 │   └── utils/
 │       ├── __init__.py
 │       └── config.py             # 配置管理
 │
-├── 📊 数据配置
+├── 📊 数据和配置
 │   └── data/
 │       ├── __init__.py
-│       └── agent_definitions.json # 智能体定义
+│       ├── agent_definitions.json # 智能体和模板定义
+│       └── vector_store/         # ChromaDB向量数据库
+│           └── chroma.sqlite3
 │
 ├── 🎨 前端资源
 │   └── templates/
-│       └── index.html            # 主页面模板
+│       └── index.html            # 主页面（单页应用）
 │
 ├── 📚 文档
-│   ├── README.md                 # 项目说明
+│   ├── README.md                 # 项目说明（本文件）
+│   ├── CLEANUP_COMPLETED.md      # 清理完成报告
+│   ├── Github.md                 # Git版本管理指南
+│   ├── LICENSE                   # MIT许可证
 │   ├── env.example               # 环境变量示例
-│   └── docs/                     # 用户文档
+│   └── docs/                     # 详细文档
 │       ├── usage_guide.md        # 使用指南
+│       ├── openai_models.md      # OpenAI模型说明
 │       ├── gemini_models.md      # Gemini模型说明
-│       └── openai_models.md      # OpenAI模型说明
+│       ├── rag_troubleshooting.md # RAG故障排除
+│       ├── RAG_DIAGNOSTIC_GUIDE.md # RAG诊断指南
+│       └── RAG_NETWORK_ISSUE.md  # RAG网络问题
 │
 └── 🐍 虚拟环境
     └── venv/                     # Python虚拟环境
@@ -421,25 +483,58 @@ ResearchAssistant_0.2/
 
 ## 🔧 配置选项
 
-### 智能体配置
+### 模板配置架构
 
-每个智能体都有独立的配置选项：
+每个智能体通过`template_id`关联到一个模板，模板包含完整的配置：
 
 ```json
 {
-  "template_config": {
-    "default_model": "gemini",
-    "preferred_ollama_model": "deepseek-r1:latest",
-    "preferred_openai_model": "gpt-4o",
-    "preferred_gemini_model": "gemini-1.5-pro",
-    "deep_research_enabled": true,
-    "web_search_enabled": true,
-    "search_engine": "duckduckgo",
-    "search_results_count": 15,
-    "include_images": true,
-    "temperature": 0.8,
-    "max_tokens": 2500,
-    "timeout": 400
+  "templates": {
+    "research_focus": {
+      "template_id": "research_focus",
+      "name": "研究助手模板",
+      "description": "专注于综合研究分析的模板",
+      "enabled": true,
+      "config": {
+        "default_model": "ollama",
+        "preferred_openai_model": "gpt-4o",
+        "preferred_gemini_model": "gemini-1.5-pro",
+        "preferred_ollama_model": "deepseek-r1:latest",
+        "temperature": 0.8,
+        "max_tokens": 2500,
+        "timeout": 400,
+        "deep_research_enabled": true,
+        "web_search_enabled": true,
+        "search_engine": "google",
+        "search_results_count": 30,
+        "include_images": false,
+        "rag_enabled": false,
+        "rag_top_k": 5,
+        "rag_context_window": 1000,
+        "rag_document_links": []
+      }
+    }
+  }
+}
+```
+
+### 智能体定义
+
+智能体定义简化为引用模板：
+
+```json
+{
+  "agents": {
+    "research": {
+      "agent_id": "research",
+      "name": "研究助手",
+      "description": "通用研究分析智能体",
+      "icon": "search",
+      "color": "primary",
+      "prompt_template": "专业级prompt...",
+      "enabled": true,
+      "template_id": "research_focus"
+    }
   }
 }
 ```
@@ -584,29 +679,39 @@ DEBUG=True python run.py
 
 ## 📈 路线图
 
-### 已实现功能 ✅
-- [x] 多智能体系统
-- [x] 多LLM支持
-- [x] 连续对话
-- [x] Web搜索集成
-- [x] 会话管理
-- [x] 对话导出
-- [x] 智能体模板配置
-
-### 已实现功能 ✅
+### v0.3 已实现功能 ✅
+- [x] 6个专业级智能体（最佳实践Prompt）
+- [x] 智能体-模板分离架构
+- [x] 灵活的模板配置系统
+- [x] 多LLM支持（OpenAI/Gemini/Ollama）
+- [x] 动态Ollama模型加载
 - [x] 本地文档RAG功能
-- [x] 多格式文档支持 (PDF, Word, MD, JSON, HTML, TXT)
-- [x] 向量数据库和语义搜索
-- [x] 智能体RAG配置
-- [x] 文档上传和管理
+- [x] 多格式文档支持（PDF/Word/MD/JSON/HTML/TXT）
+- [x] ChromaDB向量数据库
+- [x] 语义检索和RAG生成
+- [x] 网络搜索集成（DuckDuckGo/Google）
+- [x] 搜索结果卡片式展示
+- [x] 连续对话和会话管理
+- [x] 对话导出功能
+- [x] 网络搜索和RAG互斥控制
 
-### 计划功能 🚧
-- [ ] 用户认证系统
-- [ ] 智能体性能分析
-- [ ] 更多搜索提供商
-- [ ] 移动端适配
-- [ ] 插件系统
-- [ ] 多语言支持
+### v0.4 计划功能 🚧
+- [ ] 用户认证和授权系统
+- [ ] 多用户会话隔离
+- [ ] 智能体性能监控和分析
+- [ ] RAG文档版本管理
+- [ ] 更多搜索提供商（Bing, Brave）
+- [ ] 文档摘要预览
+- [ ] 批量文档上传界面
+- [ ] 移动端响应式优化
+
+### v1.0 长期规划 🌟
+- [ ] 插件系统架构
+- [ ] 自定义智能体创建向导
+- [ ] 多语言支持（英文/日文）
+- [ ] Docker容器化部署
+- [ ] 云端同步功能
+- [ ] 团队协作功能
 
 ## 🤝 贡献指南
 
@@ -640,12 +745,43 @@ DEBUG=True python run.py
 感谢以下开源项目和服务：
 
 - [Flask](https://flask.palletsprojects.com/) - Web框架
-- [OpenAI](https://openai.com/) - GPT模型
-- [Google](https://ai.google.dev/) - Gemini模型
-- [Ollama](https://ollama.ai/) - 本地LLM
-- [DuckDuckGo](https://duckduckgo.com/) - 搜索服务
+- [OpenAI](https://openai.com/) - GPT模型API
+- [Google AI](https://ai.google.dev/) - Gemini模型API
+- [Ollama](https://ollama.ai/) - 本地LLM运行时
+- [ChromaDB](https://www.trychroma.com/) - 向量数据库
+- [Sentence Transformers](https://www.sbert.net/) - 语义嵌入模型
+- [DuckDuckGo](https://duckduckgo.com/) - 隐私搜索服务
 - [Bootstrap](https://getbootstrap.com/) - UI框架
+- [PyMuPDF](https://pymupdf.readthedocs.io/) - PDF处理
+- [python-docx](https://python-docx.readthedocs.io/) - Word文档处理
 
 ---
 
-**迷途小書僮** - 让研究更智能，让思考更深入 🧠✨
+## 📝 更新日志
+
+### v0.3 (2025-10-26)
+- ✨ 新增6个专业级智能体Prompt模板
+- ✨ 实现智能体-模板分离架构
+- ✨ 集成本地文档RAG功能
+- ✨ 添加ChromaDB向量数据库
+- ✨ 支持多格式文档处理
+- ✨ 实现动态Ollama模型加载
+- ✨ 添加搜索结果卡片式展示
+- ✨ 实现网络搜索和RAG互斥控制
+- 🐛 修复模板配置保存问题
+- 🐛 修复Ollama模型配置丢失问题
+- 🧹 清理测试文件和临时文档
+- 📚 完善文档和使用指南
+
+### v0.2 (2025-10)
+- ✨ 多智能体系统基础架构
+- ✨ 多LLM支持（OpenAI/Gemini/Ollama）
+- ✨ 连续对话功能
+- ✨ Web搜索集成
+- ✨ 会话管理
+
+---
+
+**迷途小書僮 v0.3** - 让研究更智能，让思考更深入 🧠✨
+
+专业级智能体 | 本地RAG | 多LLM支持 | 100%隐私保护
