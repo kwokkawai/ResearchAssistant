@@ -129,8 +129,14 @@ def research():
             except:
                 pass  # Agent not found, continue with default
         
+        # 强制禁用Shopify助手的网络搜索和RAG功能
+        if 'shopify' in selected_agents:
+            deep_research_options['enableWebSearch'] = False
+            deep_research_options['enableDeepResearch'] = False
+            # 注意：不传递rag_manager给Shopify智能体
+        
         # Execute research using selected agents and model
-        result = agent_manager.execute_research(query, selected_agents, selected_model, context, deep_research_options, rag_manager)
+        result = agent_manager.execute_research(query, selected_agents, selected_model, context, deep_research_options, rag_manager, session_id)
         
         # Update turn with results
         turn.result = result
@@ -398,6 +404,23 @@ def update_template(template_id):
         data = request.get_json()
         print(f"📝 收到模板更新请求: template_id={template_id}")
         print(f"📋 请求数据: {data}")
+
+        # 🛡️ 强制保护Shopify模板配置
+        if template_id == 'shopify_focus' and 'config' in data:
+            config = data.get('config', {})
+            print(f"🛡️ 检测到Shopify模板更新请求，强制锁定API专用配置")
+            # 强制重置为API专用配置
+            config['web_search_enabled'] = False
+            config['rag_enabled'] = False
+            config['deep_research_enabled'] = False
+            config['search_results_count'] = 0
+            config['rag_top_k'] = 0
+            config['rag_context_window'] = 0
+            config['document_links'] = []
+            config['force_api_only'] = True
+            config['locked'] = True
+            data['config'] = config
+            print(f"✅ 已强制锁定Shopify配置为纯API模式")
 
         # Handle new template config structure
         if 'config' in data:
@@ -849,6 +872,189 @@ def clear_all_documents():
 
     except Exception as e:
         return jsonify({'error': f'Failed to clear documents: {str(e)}'}), 500
+
+# Shopify API endpoints
+@app.route('/api/shopify/connect', methods=['POST'])
+def shopify_connect():
+    """Connect to Shopify store with credentials"""
+    try:
+        from agents.shopify_agent import ShopifyInteractiveAgent
+        from integrations.shopify_api import test_connection
+        
+        data = request.get_json()
+        shop_url = data.get('shop_url', '').strip()
+        access_token = data.get('access_token', '').strip()
+        session_id = data.get('session_id', 'default')
+        
+        if not shop_url or not access_token:
+            return jsonify({
+                'success': False,
+                'error': 'Missing shop_url or access_token'
+            }), 400
+        
+        # Test connection
+        result = test_connection(shop_url, access_token)
+        
+        if result.get('success'):
+            # Store credentials in session metadata
+            if session_id in conversation_manager.sessions:
+                session = conversation_manager.sessions[session_id]
+                session.metadata['shopify'] = {
+                    'shop_url': shop_url,
+                    'access_token': access_token,
+                    'shop_info': {
+                        'name': result.get('shop_name'),
+                        'domain': result.get('shop_domain'),
+                        'email': result.get('shop_email'),
+                        'currency': result.get('currency')
+                    },
+                    'connected_at': datetime.now().isoformat()
+                }
+            
+            return jsonify({
+                'success': True,
+                'message': '成功连接到Shopify商店',
+                'shop_info': {
+                    'name': result.get('shop_name'),
+                    'domain': result.get('shop_domain'),
+                    'email': result.get('shop_email'),
+                    'currency': result.get('currency'),
+                    'timezone': result.get('timezone')
+                }
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': result.get('message', '连接失败')
+            }), 400
+            
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'Connection failed: {str(e)}'
+        }), 500
+
+@app.route('/api/shopify/disconnect', methods=['POST'])
+def shopify_disconnect():
+    """Disconnect from Shopify store"""
+    try:
+        data = request.get_json()
+        session_id = data.get('session_id', 'default')
+        
+        # Clear credentials from session metadata
+        if session_id in conversation_manager.sessions:
+            session = conversation_manager.sessions[session_id]
+            if 'shopify' in session.metadata:
+                del session.metadata['shopify']
+        
+        return jsonify({
+            'success': True,
+            'message': '已断开Shopify连接'
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'Disconnect failed: {str(e)}'
+        }), 500
+
+@app.route('/api/shopify/status', methods=['POST'])
+def shopify_status():
+    """Check Shopify connection status"""
+    try:
+        data = request.get_json()
+        session_id = data.get('session_id', 'default')
+        
+        if session_id in conversation_manager.sessions:
+            session = conversation_manager.sessions[session_id]
+            if 'shopify' in session.metadata:
+                shopify_data = session.metadata['shopify']
+                return jsonify({
+                    'connected': True,
+                    'shop_info': shopify_data.get('shop_info', {}),
+                    'connected_at': shopify_data.get('connected_at')
+                })
+        
+        return jsonify({
+            'connected': False
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'connected': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/shopify/query', methods=['POST'])
+def shopify_query():
+    """Query Shopify data (orders, customers, products, etc.)"""
+    try:
+        from integrations.shopify_api import get_shopify_client
+        
+        data = request.get_json()
+        session_id = data.get('session_id', 'default')
+        query_type = data.get('query_type', 'orders')  # orders, customers, products, analysis
+        params = data.get('params', {})
+        
+        # Get credentials from session
+        if session_id not in conversation_manager.sessions:
+            return jsonify({
+                'success': False,
+                'error': 'Session not found'
+            }), 404
+        
+        session = conversation_manager.sessions[session_id]
+        if 'shopify' not in session.metadata:
+            return jsonify({
+                'success': False,
+                'error': 'Not connected to Shopify'
+            }), 401
+        
+        shopify_data = session.metadata['shopify']
+        client = get_shopify_client(
+            shop_url=shopify_data['shop_url'],
+            access_token=shopify_data['access_token']
+        )
+        
+        # Execute query based on type
+        if query_type == 'orders':
+            result = client.get_orders(**params)
+        elif query_type == 'order':
+            result = client.get_order(params.get('order_id'))
+        elif query_type == 'customers':
+            result = client.get_customers(**params)
+        elif query_type == 'products':
+            result = client.get_products(**params)
+        elif query_type == 'analysis':
+            result = client.analyze_orders(**params)
+        elif query_type == 'shop_info':
+            result = client.get_shop_info()
+        elif query_type == 'fulfillments':
+            result = client.get_fulfillments(params.get('order_id'))
+        elif query_type == 'transactions':
+            result = client.get_transactions(params.get('order_id'))
+        else:
+            return jsonify({
+                'success': False,
+                'error': f'Unknown query type: {query_type}'
+            }), 400
+        
+        if 'error' in result:
+            return jsonify({
+                'success': False,
+                'error': result['error']
+            }), 400
+        
+        return jsonify({
+            'success': True,
+            'data': result
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'Query failed: {str(e)}'
+        }), 500
 
 if __name__ == '__main__':
     import os

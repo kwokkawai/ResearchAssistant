@@ -54,6 +54,11 @@ class Config:
             # Research settings
             'MAX_RESEARCH_DEPTH': int(os.environ.get('MAX_RESEARCH_DEPTH', 3)),
             'ENABLE_WEB_SEARCH': os.environ.get('ENABLE_WEB_SEARCH', 'True').lower() == 'true',
+            
+            # Shopify API settings
+            # Note: SHOPIFY_SHOP_DOMAIN is deprecated, use SHOPIFY_SHOP_URL
+            'SHOPIFY_SHOP_URL': os.environ.get('SHOPIFY_SHOP_URL', '') or os.environ.get('SHOPIFY_SHOP_DOMAIN', ''),
+            'SHOPIFY_ACCESS_TOKEN': os.environ.get('SHOPIFY_ACCESS_TOKEN', ''),
         }
     
     def get(self, key: str, default: Any = None) -> Any:

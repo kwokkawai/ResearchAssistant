@@ -83,6 +83,18 @@
       "template_id": "web_query",
       "created_at": "2025-10-25T08:49:12.538743",
       "updated_at": "2025-10-25T20:01:09.971665"
+    },
+    "shopify": {
+      "agent_id": "shopify",
+      "name": "Shopify助手",
+      "description": "纯Shopify API数据查询助手，仅通过Shopify Admin API获取商店数据（不使用网络搜索或文档）",
+      "icon": "store",
+      "color": "info",
+      "prompt_template": "你是一个专业的Shopify商店数据分析助手。\n\n【重要】你只能使用Shopify Admin API查询商店数据，不能使用网络搜索或文档资料。\n\n当用户首次使用时，引导他们提供Shopify凭证（商店URL和访问令牌）。\n一旦连接成功，你可以通过Shopify API帮助用户查询：\n- 订单信息（订单列表、订单详情、订单状态）\n- 发货信息（物流追踪、发货状态）\n- 交易记录（支付信息、账单详情）\n- 客户信息（客户列表、客户订单历史）\n- 产品信息（产品列表、库存状态）\n- 销售分析（销售额统计、热销产品、优质客户）\n- 商店信息（基本信息、配置）\n\n所有数据必须来自用户的Shopify商店，通过API实时获取。不要使用外部信息源。\n\n请用友好、专业的方式与用户交互，提供清晰、准确的商店数据。",
+      "enabled": true,
+      "template_id": "shopify_focus",
+      "created_at": "2025-01-09T00:00:00Z",
+      "updated_at": "2025-01-09T00:00:00Z"
     }
   },
   "templates": {
@@ -92,8 +104,8 @@
       "description": "专注于技术分析和解决方案提供的模板",
       "agents": [],
       "enabled": true,
-      "created_at": "2025-10-26T14:25:12.480060",
-      "updated_at": "2025-10-26T14:25:12.480062",
+      "created_at": "2025-10-28T00:58:23.493205",
+      "updated_at": "2025-10-28T01:05:51.392771",
       "config": {
         "default_model": "ollama",
         "preferred_openai_model": "gpt-4o-mini",
@@ -121,8 +133,8 @@
       "description": "专注于学术研究和论文写作指导的模板",
       "agents": [],
       "enabled": true,
-      "created_at": "2025-10-26T14:25:12.480065",
-      "updated_at": "2025-10-26T14:25:12.480065",
+      "created_at": "2025-10-28T00:58:23.493209",
+      "updated_at": "2025-10-28T00:58:23.493210",
       "config": {
         "default_model": "openai",
         "preferred_ollama_model": "deepseek-r1:latest",
@@ -148,8 +160,8 @@
       "description": "专注于商业分析和策略建议的模板",
       "agents": [],
       "enabled": true,
-      "created_at": "2025-10-26T14:25:12.480067",
-      "updated_at": "2025-10-26T14:27:17.059428",
+      "created_at": "2025-10-28T00:58:23.493212",
+      "updated_at": "2025-10-28T00:58:23.493212",
       "config": {
         "default_model": "ollama",
         "preferred_openai_model": "gpt-4o",
@@ -175,8 +187,8 @@
       "description": "专注于创意发想和创新设计的模板",
       "agents": [],
       "enabled": true,
-      "created_at": "2025-10-26T14:25:12.480069",
-      "updated_at": "2025-10-26T14:25:12.480070",
+      "created_at": "2025-10-28T00:58:23.493213",
+      "updated_at": "2025-10-28T00:58:23.493214",
       "config": {
         "default_model": "gemini",
         "preferred_ollama_model": "deepseek-r1:latest",
@@ -202,8 +214,8 @@
       "description": "专注于法律分析和合规建议的模板",
       "agents": [],
       "enabled": true,
-      "created_at": "2025-10-26T14:25:12.480071",
-      "updated_at": "2025-10-26T14:25:12.480072",
+      "created_at": "2025-10-28T00:58:23.493215",
+      "updated_at": "2025-10-28T00:58:23.493216",
       "config": {
         "default_model": "openai",
         "preferred_ollama_model": "deepseek-r1:latest",
@@ -229,8 +241,8 @@
       "description": "专注于综合研究和多角度分析的模板",
       "agents": [],
       "enabled": true,
-      "created_at": "2025-10-26T14:25:12.480073",
-      "updated_at": "2025-10-26T14:25:12.480074",
+      "created_at": "2025-10-28T00:58:23.493217",
+      "updated_at": "2025-10-28T00:58:23.493217",
       "config": {
         "default_model": "gemini",
         "preferred_ollama_model": "deepseek-r1:latest",
@@ -256,8 +268,8 @@
       "description": "专注于网络搜索和信息聚合的模板",
       "agents": [],
       "enabled": true,
-      "created_at": "2025-10-26T14:25:12.480075",
-      "updated_at": "2025-10-26T14:25:12.480075",
+      "created_at": "2025-10-28T00:58:23.493219",
+      "updated_at": "2025-10-28T00:58:23.493219",
       "config": {
         "default_model": "ollama",
         "preferred_openai_model": "gpt-4o",
@@ -276,12 +288,41 @@
         "rag_context_window": 2,
         "document_links": []
       }
+    },
+    "shopify_focus": {
+      "template_id": "shopify_focus",
+      "name": "Shopify API专用模板",
+      "description": "纯Shopify API数据查询模板（禁用网络搜索和文档RAG，仅使用Shopify API）",
+      "agents": [],
+      "enabled": true,
+      "created_at": "2025-10-28T00:58:23.493220",
+      "updated_at": "2025-10-28T00:58:23.493221",
+      "config": {
+        "default_model": "ollama",
+        "preferred_openai_model": "gpt-4o",
+        "preferred_gemini_model": "gemini-1.5-pro",
+        "preferred_ollama_model": "gpt-oss:20b",
+        "temperature": 0.7,
+        "max_tokens": 3000,
+        "timeout": 300,
+        "deep_research_enabled": false,
+        "web_search_enabled": false,
+        "search_engine": "duckduckgo",
+        "search_results_count": 0,
+        "include_images": false,
+        "rag_enabled": false,
+        "rag_top_k": 0,
+        "rag_context_window": 0,
+        "document_links": [],
+        "force_api_only": true,
+        "locked": true
+      }
     }
   },
   "metadata": {
     "version": "1.0.0",
-    "last_updated": "2025-10-26T14:27:17.063481",
-    "total_agents": 7,
-    "total_templates": 7
+    "last_updated": "2025-10-28T01:05:51.394038",
+    "total_agents": 8,
+    "total_templates": 8
   }
 }

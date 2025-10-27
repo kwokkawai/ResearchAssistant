@@ -353,6 +353,19 @@ class AgentManager:
         if template_id not in self.templates:
             return False
 
+        # 🛡️ 强制保护Shopify模板配置
+        if template_id == 'shopify_focus':
+            print(f"🛡️ Shopify模板配置被保护，强制重置为纯API模式")
+            config['web_search_enabled'] = False
+            config['rag_enabled'] = False
+            config['deep_research_enabled'] = False
+            config['search_results_count'] = 0
+            config['rag_top_k'] = 0
+            config['rag_context_window'] = 0
+            config['document_links'] = []
+            config['force_api_only'] = True
+            config['locked'] = True
+
         template = self.templates[template_id]
         template.config = config
         template.updated_at = datetime.now().isoformat()

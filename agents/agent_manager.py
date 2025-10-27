@@ -7,6 +7,7 @@ from typing import Dict, List, Any, Optional
 import asyncio
 import threading
 import os
+import re
 from datetime import datetime
 from llm.llm_manager import LLMManager
 from management.agent_manager import agent_manager as dynamic_agent_manager
@@ -357,17 +358,33 @@ class AgentManager:
             dynamic_agents = dynamic_agent_manager.get_enabled_agents()
             
             for agent_def in dynamic_agents:
-                # Create dynamic agent instance
-                agent = DynamicAgent(
-                    name=agent_def.name,
-                    description=agent_def.description,
-                    llm_manager=self.llm_manager,
-                    agent_definition=agent_def
-                )
-                self.agents[agent_def.agent_id] = agent
+                # 🔧 Special handling for Shopify agent - use dedicated ShopifyInteractiveAgent
+                if agent_def.agent_id == 'shopify':
+                    print(f"🛍️ 正在加载 Shopify Interactive Agent...")
+                    from agents.shopify_agent import ShopifyInteractiveAgent
+                    agent = ShopifyInteractiveAgent(
+                        name=agent_def.name,
+                        description=agent_def.description,
+                        llm_manager=self.llm_manager
+                    )
+                    # Store agent definition for template config access
+                    agent.agent_definition = agent_def
+                    self.agents[agent_def.agent_id] = agent
+                    print(f"✅ Shopify Interactive Agent 已加载")
+                else:
+                    # Create dynamic agent instance for other agents
+                    agent = DynamicAgent(
+                        name=agent_def.name,
+                        description=agent_def.description,
+                        llm_manager=self.llm_manager,
+                        agent_definition=agent_def
+                    )
+                    self.agents[agent_def.agent_id] = agent
                 
         except Exception as e:
             print(f"Error initializing dynamic agents: {e}")
+            import traceback
+            traceback.print_exc()
             # Fallback to default agents
             self._initialize_default_agents()
     
@@ -427,6 +444,13 @@ class AgentManager:
         if not selected_agents:
             return default_options
 
+        # Shopify助手强制禁用网络搜索和深度研究
+        if 'shopify' in selected_agents:
+            default_options['enableDeepResearch'] = False
+            default_options['enableWebSearch'] = False
+            default_options['searchResults'] = 0
+            return default_options
+
         # Get template config from the first selected agent
         # (If multiple agents are selected, use the first one's config as default)
         first_agent_id = selected_agents[0]
@@ -446,10 +470,19 @@ class AgentManager:
 
         return default_options
 
-    def execute_research(self, query: str, selected_agents: List[str] = None, preferred_model: str = 'openai', context: str = '', deep_research_options: Dict[str, Any] = None, rag_manager=None) -> Dict[str, Any]:
+    def execute_research(self, query: str, selected_agents: List[str] = None, preferred_model: str = 'openai', context: str = '', deep_research_options: Dict[str, Any] = None, rag_manager=None, session_id: str = None) -> Dict[str, Any]:
         """Execute research using selected agents"""
         if selected_agents is None:
             selected_agents = list(self.agents.keys())
+
+        # 强制禁用Shopify助手的网络搜索和RAG功能
+        if 'shopify' in selected_agents:
+            print("🛡️ 检测到Shopify助手，强制禁用网络搜索和RAG功能（仅使用Shopify API）")
+            if deep_research_options is None:
+                deep_research_options = {}
+            deep_research_options['enableWebSearch'] = False
+            deep_research_options['enableDeepResearch'] = False
+            rag_manager = None  # 禁用RAG管理器
 
         # Get default settings from agent template configs
         default_deep_research_options = self._get_default_deep_research_options(selected_agents)
@@ -642,6 +675,11 @@ class AgentManager:
                 agent = self.get_agent(agent_name)
                 # Pass context, web search results, and RAG results to the agent
                 context_dict = {'previous_research': context} if context else {}
+                
+                # 🔑 Add session_id to context for Shopify agent
+                if session_id:
+                    context_dict['session_id'] = session_id
+                
                 if deep_research_options and deep_research_options.get('enableWebSearch'):
                     context_dict['web_search_results'] = results.get('web_search_results', [])
                     context_dict['deep_research_enabled'] = deep_research_options.get('enableDeepResearch', False)
@@ -650,6 +688,10 @@ class AgentManager:
                 if rag_success and results.get('rag_results'):
                     context_dict['rag_results'] = results['rag_results']
                     context_dict['rag_enabled'] = True
+                
+                # 🛍️ For Shopify agent, add flag to include raw data in response
+                if agent_name == 'shopify':
+                    context_dict['include_raw_data'] = True
                 
                 result = agent.process_query(query, context_dict)
                 agent_results[agent_name] = result
@@ -682,7 +724,10 @@ class AgentManager:
             results['rag_sources'] = results['rag_results'].get('sources', [])
             print("Using RAG results for final summary")
         else:
+            # 🔧 所有查询都必须通过LLM生成总结
+            print("📝 为所有查询生成LLM总结")
             results['summary'] = self._generate_summary(query, agent_results, actual_model, results.get('web_search_results', []))
+
             if results.get('rag_error'):
                 print(f"RAG was enabled but failed, using normal agent responses for summary. RAG error: {results['rag_error']}")
 
@@ -692,11 +737,28 @@ class AgentManager:
         """Generate a summary of all agent results using the preferred model"""
         try:
             # Create a summary prompt
-            results_text = "\n\n".join([
-                f"Agent: {result.get('agent', 'unknown')}\n"
-                f"Response: {result.get('response', result.get('error', 'No response'))}"
-                for result in agent_results.values()
-            ])
+            results_text_parts = []
+            for result in agent_results.values():
+                agent = result.get('agent', 'unknown')
+                response = result.get('response', result.get('error', 'No response'))
+                
+                # 🔧 添加API数据作为上下文（对于Shopify等有api_data的代理）
+                api_data = result.get('api_data')
+                if api_data:
+                    import json
+                    api_data_str = json.dumps(api_data, indent=2, ensure_ascii=False)
+                    results_text_parts.append(
+                        f"Agent: {agent}\n"
+                        f"Response: {response}\n"
+                        f"API Data: {api_data_str}"
+                    )
+                else:
+                    results_text_parts.append(
+                        f"Agent: {agent}\n"
+                        f"Response: {response}"
+                    )
+            
+            results_text = "\n\n".join(results_text_parts)
             
             # Add web search results to summary if available
             web_search_info = ""
@@ -709,19 +771,21 @@ class AgentManager:
             
             summary_prompt = f"""
             请基于以下多个智能体的研究结果和网络搜索结果，生成一个简洁的研究总结：
-            
+
             原始查询: {query}
-            
+
             各智能体结果:
             {results_text}{web_search_info}
-            
+
             请提供一个简洁明了的总结，要求：
             1. 直接回答用户的问题，不要使用表格格式
             2. 整合所有智能体的发现和网络搜索信息
             3. 提供准确、权威的答案
             4. 如果涉及事实性问题，直接给出答案
             5. 保持简洁，避免冗长的分析
-            
+            6. 基于API数据生成人类可读的总结，不要直接输出JSON或API数据
+            7. 提取API数据中的关键信息，用自然语言描述
+
             请用中文回答，内容要简洁明了，确保包含网络搜索的最新信息。
             """
             

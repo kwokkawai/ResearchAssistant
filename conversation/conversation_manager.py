@@ -60,6 +60,7 @@ class ConversationSession:
         self.created_at = datetime.now().isoformat()
         self.turns: List[ConversationTurn] = []
         self.current_context = ""
+        self.metadata: Dict[str, Any] = {}  # Store session-specific data like Shopify credentials
     
     def add_turn(self, turn: ConversationTurn) -> None:
         """Add a new turn to the conversation"""
@@ -98,7 +99,8 @@ class ConversationSession:
             'session_id': self.session_id,
             'created_at': self.created_at,
             'turns': [turn.to_dict() for turn in self.turns],
-            'current_context': self.current_context
+            'current_context': self.current_context,
+            'metadata': self.metadata
         }
     
     @classmethod
@@ -108,6 +110,7 @@ class ConversationSession:
         session.created_at = data.get('created_at', datetime.now().isoformat())
         session.turns = [ConversationTurn.from_dict(turn_data) for turn_data in data.get('turns', [])]
         session.current_context = data.get('current_context', "")
+        session.metadata = data.get('metadata', {})
         return session
 
 class ConversationManager:

@@ -27,10 +27,11 @@
 - **向量数据库**: 基于ChromaDB的本地向量存储，100%私有数据保护
 - **连续对话**: 基于之前研究结果进行进一步研究
 - **上下文保持**: 自动使用之前的研究结果作为上下文
-- **Web搜索集成**: 支持DuckDuckGo和Google搜索API，卡片式结果展示
+- **Web搜索集成**: 支持DuckDuckGo和Google搜索API，分页支持最多100个结果
 - **深度研究**: 可配置的深度研究选项
 - **会话管理**: 支持多个独立的对话会话
 - **对话导出**: 导出完整的对话记录为JSON格式
+- **Shopify集成** 🛍️: 交互式Shopify助手，支持订单、发票、客户、产品查询
 
 ## 🏗️ 系统架构
 
@@ -150,6 +151,10 @@ AGENT_TIMEOUT=300
 GOOGLE_SEARCH_API_KEY=your-google-search-api-key-here
 GOOGLE_SEARCH_ENGINE_ID=your-google-search-engine-id-here
 
+# Shopify API配置 (可选)
+SHOPIFY_SHOP_URL=your-shop.myshopify.com
+SHOPIFY_ACCESS_TOKEN=shpat_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
 # 研究配置
 MAX_RESEARCH_DEPTH=3
 ENABLE_WEB_SEARCH=True
@@ -190,13 +195,25 @@ gunicorn -w 4 -b 0.0.0.0:5000 app:app
 ### 2. Web界面使用
 
 #### 选择智能体
-系统提供6个专业级智能体，每个都配备了行业最佳实践的Prompt模板：
+系统提供7个专业级智能体，每个都配备了行业最佳实践的Prompt模板：
 - **研究助手** 🔍: 系统性思维框架、知识图谱、研究方向建议
 - **技术专家** 💻: 技术问题分析和解决方案
 - **学术专家** 🎓: 论文结构、文献综述、研究方法、期刊投稿
 - **商业分析师** 📊: PEST分析、波特五力、商业模式画布
 - **创意专家** 💡: SCAMPER技法、设计思维、原型测试
 - **法律顾问** ⚖️: 法律分析、风险评估、合规建议
+- **Shopify助手** 🛍️: 查询Shopify商店的订单、发票、客户、产品数据
+
+#### Shopify助手使用
+Shopify助手支持查询Shopify商店数据：
+- **订单查询**: 显示最近订单、查询订单详情、按状态筛选
+- **发票查询**: 查询草稿订单、按状态筛选（未发送/已发送/已完成）
+- **客户管理**: 查询客户列表、搜索特定客户
+- **产品信息**: 查询产品列表、库存信息
+- **销售分析**: 分析销售额、订单量、热销产品
+- **商店信息**: 查询商店基本信息
+
+⚠️ **纯API模式**: Shopify助手仅使用Shopify Admin API查询数据，不使用网络搜索或RAG文档
 
 #### 配置智能体模板
 在"配置管理"中，您可以为每个智能体配置：
@@ -216,6 +233,14 @@ gunicorn -w 4 -b 0.0.0.0:5000 app:app
 - "分析共享办公空间的商业模式和市场机会"
 - "为一个环保品牌设计创意营销活动"
 - "分析电商平台的用户协议法律风险"
+
+#### Shopify助手查询示例
+- "显示最近10个订单"
+- "what is the last order"
+- "查询发票 D1"
+- "show me last 5 invoices"
+- "分析最近30天的销售数据"
+- "显示热销产品"
 
 ### 3. 连续对话功能
 
@@ -695,7 +720,18 @@ DEBUG=True python run.py
 - [x] 对话导出功能
 - [x] 网络搜索和RAG互斥控制
 
-### v0.4 计划功能 🚧
+### v0.4 已实现功能 ✅
+- [x] Shopify智能体集成（订单、发票、客户、产品查询）
+- [x] Shopify API客户端和会话管理
+- [x] Google搜索分页支持（最多100个结果）
+- [x] 交互式Shopify认证（环境变量+对话式）
+- [x] Shopify发票查询功能（Draft Orders）
+- [x] 多会话凭证管理
+- [x] LLM总结生成优化
+- [x] 发票和订单金额查询优化
+- [x] API日志功能增强
+
+### v1.0 长期规划 🌟
 - [ ] 用户认证和授权系统
 - [ ] 多用户会话隔离
 - [ ] 智能体性能监控和分析
@@ -704,8 +740,9 @@ DEBUG=True python run.py
 - [ ] 文档摘要预览
 - [ ] 批量文档上传界面
 - [ ] 移动端响应式优化
-
-### v1.0 长期规划 🌟
+- [ ] Shopify Inventory API（库存管理）
+- [ ] Shopify Discounts API（优惠券）
+- [ ] Shopify Webhooks（实时通知）
 - [ ] 插件系统架构
 - [ ] 自定义智能体创建向导
 - [ ] 多语言支持（英文/日文）
@@ -751,9 +788,35 @@ DEBUG=True python run.py
 - [ChromaDB](https://www.trychroma.com/) - 向量数据库
 - [Sentence Transformers](https://www.sbert.net/) - 语义嵌入模型
 - [DuckDuckGo](https://duckduckgo.com/) - 隐私搜索服务
+- [Shopify](https://shopify.dev/) - Shopify Admin API
 - [Bootstrap](https://getbootstrap.com/) - UI框架
 - [PyMuPDF](https://pymupdf.readthedocs.io/) - PDF处理
 - [python-docx](https://python-docx.readthedocs.io/) - Word文档处理
+
+## 🔍 高级功能说明
+
+### Shopify集成 🛍️
+
+Shopify助手是一个交互式智能体，通过Shopify Admin API查询商店数据。
+
+**核心特性**:
+- 纯API模式 - 仅使用Shopify Admin API，不使用网络搜索或RAG
+- 双重配置 - 支持环境变量和对话式认证
+- 自动认证 - 从`.env`文件自动加载凭证
+- 自然语言查询 - 支持中文和英文查询
+- 会话隔离 - 不同会话可连接不同商店
+
+**详细文档**: 参见`SHOPIFY_INTEGRATION_SUMMARY.md`和其他Shopify相关文档
+
+### Google搜索分页支持
+
+Google Custom Search API现在支持**超过10个搜索结果**！
+
+- 自动分页查询，最多可获取100个结果
+- 在`data/agent_definitions.json`中配置`search_results_count`
+- 注意API配额限制（每天100次查询）
+
+**详细说明**: 参见`GOOGLE_SEARCH_PAGINATION.md`
 
 ---
 
@@ -773,6 +836,21 @@ DEBUG=True python run.py
 - 🧹 清理测试文件和临时文档
 - 📚 完善文档和使用指南
 
+### v0.4 (2024-10-15)
+- ✨ 新增Shopify智能体集成（订单、发票、客户、产品查询）
+- ✨ Shopify API客户端和会话管理
+- ✨ Google搜索分页支持（自动分页，最多100个结果）
+- ✨ 交互式Shopify认证（环境变量+对话式双重配置）
+- ✨ Shopify发票查询功能（Draft Orders API）
+- ✨ 多会话凭证管理
+- ✨ LLM总结生成优化（所有查询统一使用LLM总结）
+- ✨ 发票和订单金额查询优化
+- ✨ API日志功能增强
+- 🐛 修复单个发票查询返回所有订单的问题
+- 🐛 修复LLM总结生成不正确的问题
+- 🧹 清理测试程序和临时文档
+- 📚 更新文档结构，整合关键信息到README
+
 ### v0.2 (2025-10)
 - ✨ 多智能体系统基础架构
 - ✨ 多LLM支持（OpenAI/Gemini/Ollama）
@@ -782,8 +860,8 @@ DEBUG=True python run.py
 
 ---
 
-**迷途小書僮 v0.3** - 让研究更智能，让思考更深入 🧠✨
+**迷途小書僮 v0.4** - 让研究更智能，让思考更深入 🧠✨
 
-专业级智能体 | 本地RAG | 多LLM支持 | 100%隐私保护
+专业级智能体 | 本地RAG | 多LLM支持 | Shopify集成 | 100%隐私保护
 
 ** Paul Kwok

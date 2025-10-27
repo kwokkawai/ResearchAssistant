@@ -29,7 +29,7 @@ class GoogleSearchProvider(WebSearchProvider):
         self.base_url = "https://www.googleapis.com/customsearch/v1"
     
     def search(self, query: str, num_results: int = 10) -> List[Dict[str, Any]]:
-        """Search using Google Custom Search API"""
+        """Search using Google Custom Search API with pagination support"""
         # Validate num_results parameter
         if num_results is None:
             num_results = 10
@@ -41,28 +41,58 @@ class GoogleSearchProvider(WebSearchProvider):
             return self._fallback_search(query, num_results)
         
         try:
-            params = {
-                'key': self.api_key,
-                'cx': self.search_engine_id,
-                'q': query,
-                'num': min(num_results, 10)  # Google API limit
-            }
-            
-            response = requests.get(self.base_url, params=params, timeout=10)
-            response.raise_for_status()
-            
-            data = response.json()
             results = []
+            # Google API allows max 10 results per request
+            # To get more, we need to paginate
+            max_per_request = 10
+            remaining = num_results
             
-            for item in data.get('items', []):
-                results.append({
-                    'title': item.get('title', ''),
-                    'url': item.get('link', ''),
-                    'snippet': item.get('snippet', ''),
-                    'source': 'Google'
-                })
+            start_index = 1
+            while remaining > 0:
+                # Determine how many results to request in this iteration
+                results_to_get = min(remaining, max_per_request)
+                
+                params = {
+                    'key': self.api_key,
+                    'cx': self.search_engine_id,
+                    'q': query,
+                    'num': results_to_get,
+                    'start': start_index
+                }
+                
+                response = requests.get(self.base_url, params=params, timeout=10)
+                response.raise_for_status()
+                
+                data = response.json()
+                items = data.get('items', [])
+                
+                # If no more items available, break
+                if not items:
+                    break
+                
+                for item in items:
+                    results.append({
+                        'title': item.get('title', ''),
+                        'url': item.get('link', ''),
+                        'snippet': item.get('snippet', ''),
+                        'source': 'Google'
+                    })
+                
+                # Check if we got all requested results
+                if len(items) < results_to_get:
+                    # No more results available
+                    break
+                
+                # Prepare for next page
+                remaining -= len(items)
+                start_index += results_to_get
+                
+                # Safety check: limit total pagination to avoid excessive API calls
+                if len(results) >= num_results or start_index > 100:
+                    break
             
-            return results
+            print(f"Google Search: Retrieved {len(results)} results (requested {num_results})")
+            return results[:num_results]
             
         except Exception as e:
             error_msg = str(e)
